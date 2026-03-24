@@ -1,0 +1,80 @@
+import 'react-native-url-polyfill/auto';
+import React, { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useAuthStore } from '../src/stores/authStore';
+import { useProfileStore } from '../src/stores/profileStore';
+import { LoadingView } from '../src/components/LoadingView';
+
+function AuthGuard() {
+  const { session, initialized: authInitialized, initialize } = useAuthStore();
+  const { profile, initialized: profileInitialized, loadProfile, reset } = useProfileStore();
+  const segments = useSegments();
+  const router = useRouter();
+
+  // Initialize auth once on mount
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  // Load profile whenever session changes
+  useEffect(() => {
+    if (!authInitialized) return;
+    if (session?.user) {
+      loadProfile(session.user.id);
+    } else {
+      reset();
+    }
+  }, [session, authInitialized]);
+
+  // Handle routing based on auth + profile state
+  useEffect(() => {
+    if (!authInitialized) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const inOnboarding = segments[0] === 'onboarding';
+
+    if (!session) {
+      if (!inAuthGroup) router.replace('/(auth)/login');
+      return;
+    }
+
+    // Session exists — wait for profile to load before redirecting
+    if (!profileInitialized) return;
+
+    if (!profile?.onboarding_completed) {
+      if (!inOnboarding) router.replace('/onboarding');
+    } else {
+      if (inAuthGroup || inOnboarding) router.replace('/(app)');
+    }
+  }, [session, authInitialized, profile, profileInitialized, segments]);
+
+  return null;
+}
+
+export default function RootLayout() {
+  const { initialized } = useAuthStore();
+
+  if (!initialized) {
+    return <LoadingView message="잠깐만요..." />;
+  }
+
+  return (
+    <>
+      <StatusBar style="dark" />
+      <AuthGuard />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(app)" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen
+          name="answer"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </>
+  );
+}
