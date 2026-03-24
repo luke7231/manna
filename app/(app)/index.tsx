@@ -126,7 +126,7 @@ export default function HomeScreen() {
             label={profile?.partner_name ?? '상대방'}
             answer={partnerAnswer}
             isConnected={isConnected}
-            onPress={isConnected && !partnerAnswer ? undefined : undefined}
+            myAnswerExists={!!myAnswer}
           />
 
           {/* Connect nudge */}

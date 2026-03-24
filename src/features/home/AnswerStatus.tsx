@@ -9,6 +9,7 @@ interface AnswerStatusProps {
   answer: Answer | null;
   isMe?: boolean;
   isConnected?: boolean;
+  myAnswerExists?: boolean;
   onPress?: () => void;
 }
 
@@ -17,6 +18,7 @@ export function AnswerStatus({
   answer,
   isMe = false,
   isConnected = false,
+  myAnswerExists = false,
   onPress,
 }: AnswerStatusProps) {
   const renderContent = () => {
@@ -47,6 +49,13 @@ export function AnswerStatus({
       return (
         <Text style={styles.notConnected}>
           상대방과 연결되면{'\n'}답변을 확인할 수 있어요 💌
+        </Text>
+      );
+    }
+    if (!myAnswerExists) {
+      return (
+        <Text style={styles.notConnected}>
+          내 답변을 먼저 작성해야{'\n'}상대방 답변을 볼 수 있어요 🔒
         </Text>
       );
     }

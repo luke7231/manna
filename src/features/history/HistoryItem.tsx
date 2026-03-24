@@ -60,7 +60,9 @@ export function HistoryItem({ item, isConnected, partnerName }: HistoryItemProps
         <View style={styles.partnerSection}>
           <View style={styles.divider} />
           <Text style={styles.partnerLabel}>{partnerName ?? '상대방'}</Text>
-          {partnerAnswer ? (
+          {!myAnswer ? (
+            <Text style={styles.noAnswerText}>내 답변을 작성해야 볼 수 있어요 🔒</Text>
+          ) : partnerAnswer ? (
             <Text style={styles.partnerAnswerText}>{partnerAnswer.answer_text}</Text>
           ) : (
             <Text style={styles.noAnswerText}>아직 답변하지 않았어요</Text>
