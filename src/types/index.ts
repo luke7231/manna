@@ -1,7 +1,7 @@
 export interface Profile {
   id: string;
   name: string;
-  relationship_type: 'some' | 'couple' | 'self';
+  relationship_type: 'couple';
   partner_name: string | null;
   onboarding_completed: boolean;
   created_at: string;

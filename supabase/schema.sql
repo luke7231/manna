@@ -9,8 +9,8 @@
 CREATE TABLE IF NOT EXISTS profiles (
   id                    UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   name                  TEXT NOT NULL DEFAULT '',
-  relationship_type     TEXT NOT NULL DEFAULT 'self'
-                          CHECK (relationship_type IN ('some', 'couple', 'self')),
+  relationship_type     TEXT NOT NULL DEFAULT 'couple'
+                          CHECK (relationship_type IN ('couple')),
   partner_name          TEXT,
   onboarding_completed  BOOLEAN NOT NULL DEFAULT FALSE,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),

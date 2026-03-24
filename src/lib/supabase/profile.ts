@@ -28,7 +28,7 @@ export async function upsertProfile(
 export async function completeOnboarding(
   userId: string,
   name: string,
-  relationship_type: 'some' | 'couple' | 'self',
+  relationship_type: 'couple',
   partner_name?: string
 ): Promise<{ data: Profile | null; error: Error | null }> {
   return upsertProfile(userId, {

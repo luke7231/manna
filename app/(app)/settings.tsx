@@ -12,11 +12,6 @@ import { colors } from '../../src/lib/constants/colors';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
 
-const RELATIONSHIP_LABELS = {
-  some: '썸 타는 중 💘',
-  couple: '연인 사이 💑',
-  self: '혼자서 🌱',
-};
 
 function SettingRow({
   label,
@@ -79,11 +74,6 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabel}>프로필</Text>
         <Card padding={0} style={styles.sectionCard}>
           <SettingRow label="내 이름" value={profile?.name ?? '-'} />
-          <View style={styles.rowDivider} />
-          <SettingRow
-            label="관계 유형"
-            value={profile?.relationship_type ? RELATIONSHIP_LABELS[profile.relationship_type] : '-'}
-          />
           {profile?.partner_name && (
             <>
               <View style={styles.rowDivider} />
