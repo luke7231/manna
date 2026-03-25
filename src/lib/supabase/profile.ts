@@ -25,6 +25,19 @@ export async function upsertProfile(
   return { data: data as Profile, error };
 }
 
+export async function savePushToken(userId: string, token: string): Promise<void> {
+  await supabase.from('profiles').update({ push_token: token }).eq('id', userId);
+}
+
+export async function getPartnerPushToken(partnerId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('push_token')
+    .eq('id', partnerId)
+    .single();
+  return data?.push_token ?? null;
+}
+
 export async function completeOnboarding(
   userId: string,
   name: string,

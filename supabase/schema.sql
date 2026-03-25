@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS profiles (
                           CHECK (relationship_type IN ('couple')),
   partner_name          TEXT,
   onboarding_completed  BOOLEAN NOT NULL DEFAULT FALSE,
+  push_token            TEXT,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -111,10 +112,20 @@ ALTER TABLE questions       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE answers         ENABLE ROW LEVEL SECURITY;
 
--- PROFILES: own row only
+-- PROFILES: own row only; connected partner can read (for push_token)
 CREATE POLICY "profiles_select_own"
   ON profiles FOR SELECT
-  USING (auth.uid() = id);
+  USING (
+    auth.uid() = id
+    OR EXISTS (
+      SELECT 1 FROM pairs
+      WHERE status = 'connected'
+        AND (
+          (user1_id = auth.uid() AND user2_id = profiles.id)
+          OR (user2_id = auth.uid() AND user1_id = profiles.id)
+        )
+    )
+  );
 
 CREATE POLICY "profiles_insert_own"
   ON profiles FOR INSERT

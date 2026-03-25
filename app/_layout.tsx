@@ -5,6 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '../src/stores/authStore';
 import { useProfileStore } from '../src/stores/profileStore';
 import { LoadingView } from '../src/components/LoadingView';
+import { registerForPushNotifications } from '../src/lib/notifications';
+import { savePushToken } from '../src/lib/supabase/profile';
 
 function AuthGuard() {
   const { session, initialized: authInitialized, initialize } = useAuthStore();
@@ -26,6 +28,16 @@ function AuthGuard() {
       reset();
     }
   }, [session, authInitialized]);
+
+  // Register push token once onboarding is complete
+  useEffect(() => {
+    if (!session?.user || !profile?.onboarding_completed) return;
+    registerForPushNotifications().then((token) => {
+      if (token && token !== profile.push_token) {
+        savePushToken(session.user.id, token);
+      }
+    });
+  }, [profile?.onboarding_completed, profile?.push_token]);
 
   // Handle routing based on auth + profile state
   useEffect(() => {

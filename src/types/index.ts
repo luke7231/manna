@@ -4,6 +4,7 @@ export interface Profile {
   relationship_type: 'couple';
   partner_name: string | null;
   onboarding_completed: boolean;
+  push_token: string | null;
   created_at: string;
   updated_at: string;
 }

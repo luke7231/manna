@@ -16,7 +16,11 @@ import { Card } from '../src/components/Card';
 import { LoadingView } from '../src/components/LoadingView';
 import { colors } from '../src/lib/constants/colors';
 import { getMyAnswer, upsertAnswer } from '../src/lib/supabase/answers';
+import { getPartnerPushToken } from '../src/lib/supabase/profile';
+import { sendAnswerNotification } from '../src/lib/notifications';
+import { getPartnerId } from '../src/lib/supabase/pairing';
 import { useAuthStore } from '../src/stores/authStore';
+import { useProfileStore } from '../src/stores/profileStore';
 
 export default function AnswerScreen() {
   const { questionId, questionContent } = useLocalSearchParams<{
@@ -24,6 +28,7 @@ export default function AnswerScreen() {
     questionContent: string;
   }>();
   const { user } = useAuthStore();
+  const { profile, pair } = useProfileStore();
   const router = useRouter();
 
   const [answerText, setAnswerText] = useState('');
@@ -59,6 +64,16 @@ export default function AnswerScreen() {
     if (error) {
       Alert.alert('오류', '저장 중 문제가 생겼어요. 다시 시도해주세요.');
       return;
+    }
+
+    // 신규 작성 시만 연인에게 푸시 알림 발송 (수정 시에는 미발송)
+    if (!isEditing && pair && profile) {
+      const partnerId = getPartnerId(pair, user!.id);
+      if (partnerId) {
+        getPartnerPushToken(partnerId).then((token) => {
+          if (token) sendAnswerNotification(token, profile.name);
+        });
+      }
     }
 
     router.back();
