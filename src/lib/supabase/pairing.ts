@@ -140,3 +140,15 @@ export function getPartnerId(pair: Pair, myUserId: string): string | null {
   if (pair.user1_id === myUserId) return pair.user2_id;
   return pair.user1_id;
 }
+
+export async function updateNotificationTime(
+  pairId: string,
+  hour: number,
+  minute: number
+): Promise<{ error: Error | null }> {
+  const { error } = await supabase
+    .from('pairs')
+    .update({ notification_hour: hour, notification_minute: minute })
+    .eq('id', pairId);
+  return { error };
+}

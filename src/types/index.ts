@@ -39,6 +39,8 @@ export interface Pair {
   user1_id: string;
   user2_id: string | null;
   status: 'pending' | 'connected';
+  notification_hour: number;
+  notification_minute: number;
   created_at: string;
   updated_at: string;
 }

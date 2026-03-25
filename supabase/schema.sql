@@ -22,13 +22,15 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- 2. PAIRS
 -- ───────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pairs (
-  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user1_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  user2_id    UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  status      TEXT NOT NULL DEFAULT 'pending'
-                CHECK (status IN ('pending', 'connected')),
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user1_id            UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user2_id            UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  status              TEXT NOT NULL DEFAULT 'pending'
+                        CHECK (status IN ('pending', 'connected')),
+  notification_hour   INT NOT NULL DEFAULT 9,
+  notification_minute INT NOT NULL DEFAULT 0,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ───────────────────────────────────────────────────────────

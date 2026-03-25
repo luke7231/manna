@@ -5,16 +5,25 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { InviteCodePanel } from '../../src/features/pairing/InviteCodePanel';
 import { Card } from '../../src/components/Card';
 import { LoadingView } from '../../src/components/LoadingView';
 import { colors } from '../../src/lib/constants/colors';
-import { getMyInviteCode } from '../../src/lib/supabase/pairing';
-import { getUserPair } from '../../src/lib/supabase/pairing';
+import { getMyInviteCode, getUserPair, updateNotificationTime } from '../../src/lib/supabase/pairing';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
+import { scheduleDailyQuestionNotification } from '../../src/lib/notifications';
+
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6 ~ 22
+
+function formatHour(hour: number): string {
+  if (hour < 12) return `오전 ${hour}시`;
+  if (hour === 12) return '오후 12시';
+  return `오후 ${hour - 12}시`;
+}
 
 export default function PairingScreen() {
   const { user } = useAuthStore();
@@ -23,6 +32,7 @@ export default function PairingScreen() {
   const [existingCode, setExistingCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [updatingTime, setUpdatingTime] = useState(false);
 
   const isConnected = pair?.status === 'connected';
 
@@ -52,8 +62,16 @@ export default function PairingScreen() {
 
   const handleConnected = async () => {
     if (!user) return;
-    // Reload profile and pair from DB
     await loadProfile(user.id);
+  };
+
+  const handleTimeChange = async (hour: number) => {
+    if (!pair || updatingTime) return;
+    setUpdatingTime(true);
+    await updateNotificationTime(pair.id, hour, 0);
+    setPair({ ...pair, notification_hour: hour, notification_minute: 0 });
+    await scheduleDailyQuestionNotification(hour, 0);
+    setUpdatingTime(false);
   };
 
   if (loading) return <LoadingView />;
@@ -72,15 +90,49 @@ export default function PairingScreen() {
       </View>
 
       {isConnected ? (
-        <Card style={styles.connectedCard} padding={24}>
-          <Text style={styles.connectedEmoji}>💑</Text>
-          <Text style={styles.connectedTitle}>연결되었어요!</Text>
-          <Text style={styles.connectedDesc}>
-            {profile?.partner_name
-              ? `${profile.partner_name}와(과) 연결되어 있어요.\n이제 서로의 답변을 볼 수 있어요 ✨`
-              : '상대방과 연결되어 있어요.\n이제 서로의 답변을 볼 수 있어요 ✨'}
-          </Text>
-        </Card>
+        <>
+          <Card style={styles.connectedCard} padding={24}>
+            <Text style={styles.connectedEmoji}>💑</Text>
+            <Text style={styles.connectedTitle}>연결되었어요!</Text>
+            <Text style={styles.connectedDesc}>
+              {profile?.partner_name
+                ? `${profile.partner_name}와(과) 연결되어 있어요.\n이제 서로의 답변을 볼 수 있어요 ✨`
+                : '상대방과 연결되어 있어요.\n이제 서로의 답변을 볼 수 있어요 ✨'}
+            </Text>
+          </Card>
+
+          {/* 알림 시간 선택 */}
+          <Card style={styles.notifCard} padding={20}>
+            <Text style={styles.notifTitle}>매일 알림 시간</Text>
+            <Text style={styles.notifDesc}>
+              오늘의 질문 알림을 받을 시간을 선택하세요
+            </Text>
+            <Text style={styles.currentTime}>
+              현재: {formatHour(pair?.notification_hour ?? 9)}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.hourList}
+            >
+              {HOURS.map((hour) => {
+                const selected = (pair?.notification_hour ?? 9) === hour;
+                return (
+                  <TouchableOpacity
+                    key={hour}
+                    style={[styles.hourChip, selected && styles.hourChipSelected]}
+                    onPress={() => handleTimeChange(hour)}
+                    disabled={updatingTime}
+                  >
+                    <Text style={[styles.hourChipText, selected && styles.hourChipTextSelected]}>
+                      {formatHour(hour)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </Card>
+        </>
       ) : (
         <InviteCodePanel
           userId={user!.id}
@@ -140,6 +192,49 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  notifCard: {
+    gap: 12,
+  },
+  notifTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  notifDesc: {
+    fontSize: 13,
+    color: colors.textMuted,
+    lineHeight: 19,
+  },
+  currentTime: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  hourList: {
+    gap: 8,
+    paddingVertical: 4,
+  },
+  hourChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.cardAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  hourChipSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  hourChipText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.textMuted,
+  },
+  hourChipTextSelected: {
+    color: '#fff',
+    fontWeight: '700',
   },
   infoCard: {
     gap: 10,

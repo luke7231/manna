@@ -5,12 +5,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '../src/stores/authStore';
 import { useProfileStore } from '../src/stores/profileStore';
 import { LoadingView } from '../src/components/LoadingView';
-import { registerForPushNotifications } from '../src/lib/notifications';
+import { registerForPushNotifications, scheduleDailyQuestionNotification } from '../src/lib/notifications';
 import { savePushToken } from '../src/lib/supabase/profile';
 
 function AuthGuard() {
   const { session, initialized: authInitialized, initialize } = useAuthStore();
-  const { profile, initialized: profileInitialized, loadProfile, reset } = useProfileStore();
+  const { profile, pair, initialized: profileInitialized, loadProfile, reset } = useProfileStore();
   const segments = useSegments();
   const router = useRouter();
 
@@ -38,6 +38,15 @@ function AuthGuard() {
       }
     });
   }, [profile?.onboarding_completed, profile?.push_token]);
+
+  // Schedule daily question notification when pair is connected
+  useEffect(() => {
+    if (pair?.status !== 'connected') return;
+    scheduleDailyQuestionNotification(
+      pair.notification_hour ?? 9,
+      pair.notification_minute ?? 0
+    );
+  }, [pair?.status, pair?.notification_hour, pair?.notification_minute]);
 
   // Handle routing based on auth + profile state
   useEffect(() => {
