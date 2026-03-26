@@ -7,6 +7,7 @@ import { useProfileStore } from '../src/stores/profileStore';
 import { LoadingView } from '../src/components/LoadingView';
 import { registerForPushNotifications, scheduleDailyQuestionNotification } from '../src/lib/notifications';
 import { savePushToken } from '../src/lib/supabase/profile';
+import MobileAds from 'react-native-google-mobile-ads';
 
 function AuthGuard() {
   const { session, initialized: authInitialized, initialize } = useAuthStore();
@@ -75,6 +76,10 @@ function AuthGuard() {
 
 export default function RootLayout() {
   const { initialized } = useAuthStore();
+
+  useEffect(() => {
+    MobileAds().initialize();
+  }, []);
 
   if (!initialized) {
     return <LoadingView message="잠깐만요..." />;
