@@ -264,7 +264,105 @@ CREATE POLICY "pair_invites_delete_creator"
   USING (auth.uid() = created_by);
 
 -- ───────────────────────────────────────────────────────────
--- 9. INDEXES for common queries
+-- 9. SHOP — 방꾸미기 시스템
+-- ───────────────────────────────────────────────────────────
+
+-- 상점 아이템 (관리자 seed로 등록)
+CREATE TABLE IF NOT EXISTS shop_items (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  category    TEXT NOT NULL CHECK (category IN ('theme', 'furniture', 'pet_name')),
+  name        TEXT NOT NULL,
+  description TEXT,
+  price       INT NOT NULL,
+  emoji       TEXT,
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  sort_order  INT NOT NULL DEFAULT 0
+);
+
+-- 커플이 구매한 아이템
+CREATE TABLE IF NOT EXISTS pair_items (
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  pair_id      UUID REFERENCES pairs(id) ON DELETE CASCADE NOT NULL,
+  item_id      UUID REFERENCES shop_items(id) ON DELETE CASCADE NOT NULL,
+  purchased_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (pair_id, item_id)
+);
+
+-- 방 현재 상태 (배치된 테마 + 가구)
+CREATE TABLE IF NOT EXISTS rooms (
+  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  pair_id       UUID REFERENCES pairs(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  theme_item_id UUID REFERENCES shop_items(id),
+  furniture     JSONB NOT NULL DEFAULT '[]',
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 구매 + 잔액 차감 원자적 RPC
+CREATE OR REPLACE FUNCTION purchase_item(p_pair_id UUID, p_item_id UUID)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  v_price   INT;
+  v_balance INT;
+BEGIN
+  SELECT price INTO v_price FROM shop_items WHERE id = p_item_id AND is_active = TRUE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'item_not_found'; END IF;
+
+  UPDATE pairs SET pebbles = pebbles - v_price
+  WHERE id = p_pair_id AND pebbles >= v_price
+  RETURNING pebbles INTO v_balance;
+  IF NOT FOUND THEN RAISE EXCEPTION 'insufficient_pebbles'; END IF;
+
+  INSERT INTO pair_items (pair_id, item_id) VALUES (p_pair_id, p_item_id)
+  ON CONFLICT DO NOTHING;
+
+  RETURN jsonb_build_object('balance', v_balance);
+END; $$;
+
+-- RLS
+ALTER TABLE shop_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pair_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rooms      ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "shop_items_read"
+  ON shop_items FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+CREATE POLICY "pair_items_member"
+  ON pair_items FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM pairs
+      WHERE pairs.id = pair_items.pair_id
+        AND (pairs.user1_id = auth.uid() OR pairs.user2_id = auth.uid())
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM pairs
+      WHERE pairs.id = pair_items.pair_id
+        AND (pairs.user1_id = auth.uid() OR pairs.user2_id = auth.uid())
+    )
+  );
+
+CREATE POLICY "rooms_member"
+  ON rooms FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM pairs
+      WHERE pairs.id = rooms.pair_id
+        AND (pairs.user1_id = auth.uid() OR pairs.user2_id = auth.uid())
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM pairs
+      WHERE pairs.id = rooms.pair_id
+        AND (pairs.user1_id = auth.uid() OR pairs.user2_id = auth.uid())
+    )
+  );
+
+-- ───────────────────────────────────────────────────────────
+-- 10. INDEXES for common queries
 -- ───────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_daily_questions_date ON daily_questions (question_date DESC);
 CREATE INDEX IF NOT EXISTS idx_answers_user_question ON answers (user_id, question_id);

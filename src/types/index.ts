@@ -88,3 +88,29 @@ export function getPetStage(totalAnswers: number): number {
   }
   return 0;
 }
+
+export interface ShopItem {
+  id: string;
+  category: 'theme' | 'furniture' | 'pet_name';
+  name: string;
+  description: string | null;
+  price: number;
+  emoji: string | null;
+  is_active: boolean;
+  sort_order: number;
+}
+
+export interface PairItem {
+  id: string;
+  pair_id: string;
+  item_id: string;
+  purchased_at: string;
+}
+
+export interface Room {
+  id: string;
+  pair_id: string;
+  theme_item_id: string | null;
+  furniture: { item_id: string; slot: number }[];
+  updated_at: string;
+}

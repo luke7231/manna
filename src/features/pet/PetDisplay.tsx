@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Pet, PET_STAGES, getPetStage } from '../../types';
 import { colors } from '../../lib/constants/colors';
 
 interface PetDisplayProps {
   pet: Pet;
+  onRename?: () => void;
 }
 
-export function PetDisplay({ pet }: PetDisplayProps) {
+export function PetDisplay({ pet, onRename }: PetDisplayProps) {
   const stageIndex = getPetStage(pet.total_answers);
   const current = PET_STAGES[stageIndex];
   const isMaxStage = stageIndex === PET_STAGES.length - 1;
@@ -25,7 +26,9 @@ export function PetDisplay({ pet }: PetDisplayProps) {
       <Text style={styles.petEmoji}>{current.emoji}</Text>
 
       {/* 이름 + 단계 */}
-      <Text style={styles.petName}>{pet.name}</Text>
+      <TouchableOpacity onPress={onRename} disabled={!onRename}>
+        <Text style={styles.petName}>{pet.name} {onRename ? '✏️' : ''}</Text>
+      </TouchableOpacity>
       <Text style={styles.stageLabel}>{current.label} 단계</Text>
 
       {/* 성장 진행 바 */}
