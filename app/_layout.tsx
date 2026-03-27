@@ -8,6 +8,7 @@ import { LoadingView } from '../src/components/LoadingView';
 import { registerForPushNotifications, scheduleDailyQuestionNotification } from '../src/lib/notifications';
 import { savePushToken } from '../src/lib/supabase/profile';
 import MobileAds from 'react-native-google-mobile-ads';
+import { configurePurchases, loginPurchases, logoutPurchases } from '../src/lib/purchases';
 
 function AuthGuard() {
   const { session, initialized: authInitialized, initialize } = useAuthStore();
@@ -39,6 +40,15 @@ function AuthGuard() {
       }
     });
   }, [profile?.onboarding_completed, profile?.push_token]);
+
+  // RevenueCat 유저 연결/해제
+  useEffect(() => {
+    if (session?.user) {
+      loginPurchases(session.user.id);
+    } else {
+      logoutPurchases();
+    }
+  }, [session?.user?.id]);
 
   // Schedule daily question notification when pair is connected
   useEffect(() => {
@@ -79,6 +89,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     MobileAds().initialize();
+    configurePurchases();
   }, []);
 
   if (!initialized) {

@@ -21,7 +21,9 @@
     "expo-status-bar": "~2.0.0",
     "react": "18.3.1",
     "react-native": "0.76.3",
+    "expo-image-picker": "~16.0.0",
     "react-native-google-mobile-ads": "^14.0.0",
+    "react-native-purchases": "^8.0.0",
     "react-native-url-polyfill": "^2.0.0",
     "zustand": "^5.0.0"
   },

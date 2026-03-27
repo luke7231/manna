@@ -24,11 +24,13 @@ import { formatTodayFull } from '../../src/lib/utils/date';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
 import { useRewardedAd } from '../../src/hooks/useRewardedAd';
+import { useGoldStatus } from '../../src/hooks/useGoldStatus';
 import { DailyQuestion, Answer } from '../../src/types';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const { profile, pair, setPair } = useProfileStore();
+  const { isGold } = useGoldStatus();
   const router = useRouter();
 
   const [dailyQuestion, setDailyQuestion] = useState<DailyQuestion | null>(null);
@@ -127,8 +129,8 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* 리워드 광고 버튼 (연결된 커플만) */}
-      {isConnected && (
+      {/* 리워드 광고 버튼 (연결된 커플만, 골드 아닐 때만) */}
+      {isConnected && !isGold && (
         <TouchableOpacity
           style={[styles.adButton, !adLoaded && styles.adButtonDisabled]}
           onPress={showAd}

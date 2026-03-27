@@ -7,10 +7,13 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Card } from '../../src/components/Card';
+import { GoldBadge } from '../../src/components/GoldBadge';
 import { colors } from '../../src/lib/constants/colors';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
+import { useGoldStatus } from '../../src/hooks/useGoldStatus';
 
 
 function SettingRow({
@@ -43,6 +46,8 @@ function SettingRow({
 export default function SettingsScreen() {
   const { signOut } = useAuthStore();
   const { profile } = useProfileStore();
+  const { isGold, expiresAt } = useGoldStatus();
+  const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = () => {
@@ -67,6 +72,47 @@ export default function SettingsScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>설정</Text>
+      </View>
+
+      {/* 만나골드 섹션 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>구독</Text>
+        {isGold ? (
+          <TouchableOpacity
+            style={styles.goldActiveCard}
+            onPress={() => router.push('/(app)/gold')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.goldActiveLeft}>
+              <Text style={styles.goldActiveEmoji}>⭐</Text>
+              <View style={styles.goldActiveInfo}>
+                <View style={styles.goldActiveTitleRow}>
+                  <Text style={styles.goldActiveTitle}>만나골드 이용 중</Text>
+                  <GoldBadge size="sm" />
+                </View>
+                {expiresAt && (
+                  <Text style={styles.goldActiveExpiry}>
+                    갱신일: {new Date(expiresAt).toLocaleDateString('ko-KR')}
+                  </Text>
+                )}
+              </View>
+            </View>
+            <Text style={styles.settingArrow}>›</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.goldPromoCard}
+            onPress={() => router.push('/(app)/gold')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.goldPromoEmoji}>⭐</Text>
+            <View style={styles.goldPromoInfo}>
+              <Text style={styles.goldPromoTitle}>만나골드 시작하기</Text>
+              <Text style={styles.goldPromoDesc}>광고 제거 · 사진 첨부 · 히스토리 무제한</Text>
+            </View>
+            <Text style={styles.settingArrow}>›</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Profile section */}
@@ -178,5 +224,68 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     textAlign: 'center',
     marginTop: 8,
+  },
+  goldActiveCard: {
+    backgroundColor: '#FFFDF0',
+    borderWidth: 1.5,
+    borderColor: '#F0C040',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  goldActiveLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  goldActiveEmoji: {
+    fontSize: 28,
+  },
+  goldActiveInfo: {
+    gap: 3,
+  },
+  goldActiveTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  goldActiveTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#8B6A00',
+  },
+  goldActiveExpiry: {
+    fontSize: 12,
+    color: colors.textMuted,
+  },
+  goldPromoCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  goldPromoEmoji: {
+    fontSize: 28,
+  },
+  goldPromoInfo: {
+    flex: 1,
+    gap: 3,
+  },
+  goldPromoTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  goldPromoDesc: {
+    fontSize: 12,
+    color: colors.textMuted,
   },
 });

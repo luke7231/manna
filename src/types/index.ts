@@ -6,6 +6,8 @@ export interface Profile {
   onboarding_completed: boolean;
   push_token: string | null;
   attendance_date: string | null;
+  is_gold: boolean;
+  gold_expires_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -31,6 +33,7 @@ export interface Answer {
   user_id: string;
   question_id: string;
   answer_text: string;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -97,8 +100,11 @@ export interface ShopItem {
   price: number;
   emoji: string | null;
   is_active: boolean;
+  is_gold_only: boolean;
   sort_order: number;
 }
+
+export type GoldPlan = 'monthly' | 'annual';
 
 export interface PairItem {
   id: string;

@@ -9,19 +9,22 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { LoadingView } from '../src/components/LoadingView';
 import { colors } from '../src/lib/constants/colors';
-import { getMyAnswer, upsertAnswer } from '../src/lib/supabase/answers';
+import { getMyAnswer, upsertAnswer, uploadAnswerImage } from '../src/lib/supabase/answers';
 import { getPartnerPushToken } from '../src/lib/supabase/profile';
 import { sendAnswerNotification } from '../src/lib/notifications';
 import { getPartnerId, addPebbles } from '../src/lib/supabase/pairing';
 import { incrementPetAnswers } from '../src/lib/supabase/pet';
 import { useAuthStore } from '../src/stores/authStore';
 import { useProfileStore } from '../src/stores/profileStore';
+import { useGoldStatus } from '../src/hooks/useGoldStatus';
 
 export default function AnswerScreen() {
   const { questionId, questionContent } = useLocalSearchParams<{
@@ -30,9 +33,11 @@ export default function AnswerScreen() {
   }>();
   const { user } = useAuthStore();
   const { profile, pair, setPair, refreshPair } = useProfileStore();
+  const { isGold } = useGoldStatus();
   const router = useRouter();
 
   const [answerText, setAnswerText] = useState('');
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,9 +52,27 @@ export default function AnswerScreen() {
     const existing = await getMyAnswer(user!.id, questionId);
     if (existing) {
       setAnswerText(existing.answer_text);
+      if (existing.image_url) setImageUri(existing.image_url);
       setIsEditing(true);
     }
     setLoading(false);
+  };
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('권한 필요', '사진 접근 권한이 필요해요.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+      allowsEditing: true,
+      aspect: [4, 3],
+    });
+    if (!result.canceled && result.assets[0]) {
+      setImageUri(result.assets[0].uri);
+    }
   };
 
   const handleSave = async () => {
@@ -59,7 +82,16 @@ export default function AnswerScreen() {
       return;
     }
     setSaving(true);
-    const { error } = await upsertAnswer(user!.id, questionId, trimmed);
+
+    // 이미지 업로드 (골드 + 새 로컬 URI인 경우)
+    let uploadedImageUrl: string | undefined;
+    if (isGold && imageUri && imageUri.startsWith('file://')) {
+      uploadedImageUrl = await uploadAnswerImage(user!.id, questionId, imageUri) ?? undefined;
+    } else if (imageUri && !imageUri.startsWith('file://')) {
+      uploadedImageUrl = imageUri; // 기존 URL 유지
+    }
+
+    const { error } = await upsertAnswer(user!.id, questionId, trimmed, uploadedImageUrl);
     setSaving(false);
 
     if (error) {
@@ -132,6 +164,25 @@ export default function AnswerScreen() {
           />
           <Text style={styles.charCount}>{answerText.length}자</Text>
         </View>
+
+        {/* 사진 첨부 (골드 전용) */}
+        {isGold && (
+          <View style={styles.imageSection}>
+            <TouchableOpacity style={styles.imagePickerBtn} onPress={handlePickImage} activeOpacity={0.7}>
+              <Text style={styles.imagePickerText}>
+                {imageUri ? '📸 사진 변경' : '📸 사진 첨부 (골드)'}
+              </Text>
+            </TouchableOpacity>
+            {imageUri && (
+              <View style={styles.imagePreviewRow}>
+                <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+                <TouchableOpacity onPress={() => setImageUri(null)} style={styles.imageRemoveBtn}>
+                  <Text style={styles.imageRemoveText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
 
         <Button
           title={isEditing ? '수정 완료' : '저장하기'}
@@ -211,5 +262,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textLight,
     textAlign: 'right',
+  },
+  imageSection: {
+    gap: 10,
+  },
+  imagePickerBtn: {
+    backgroundColor: '#FFFDF0',
+    borderWidth: 1,
+    borderColor: '#F0C040',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  imagePickerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8B6A00',
+  },
+  imagePreviewRow: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+  },
+  imagePreview: {
+    width: 120,
+    height: 90,
+    borderRadius: 10,
+  },
+  imageRemoveBtn: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: colors.text,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageRemoveText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

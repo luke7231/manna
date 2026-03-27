@@ -16,6 +16,7 @@ import { getShopItems, getMyItems, purchaseItem } from '../../lib/supabase/shop'
 import { updateRoomTheme, updateRoomFurniture } from '../../lib/supabase/room';
 import { renamePet } from '../../lib/supabase/pet';
 import { useProfileStore } from '../../stores/profileStore';
+import { useGoldStatus } from '../../hooks/useGoldStatus';
 
 type Tab = 'theme' | 'furniture' | 'pet_name';
 
@@ -43,6 +44,7 @@ export function ShopView({
   onPetRenamed,
 }: ShopViewProps) {
   const { pair, setPair } = useProfileStore();
+  const { isGold } = useGoldStatus();
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [myItems, setMyItems] = useState<string[]>([]);
@@ -155,7 +157,11 @@ export function ShopView({
 
   const filtered = shopItems.filter((i) => i.category === activeTab);
 
+  const isGoldLocked = (item: ShopItem): boolean =>
+    item.is_gold_only && !isGold;
+
   const getButtonLabel = (item: ShopItem): string => {
+    if (isGoldLocked(item)) return '⭐ 골드 전용';
     const owned = myItems.includes(item.id);
     if (!owned) return item.price === 0 ? '무료 받기' : `🪨 ${item.price}`;
     if (item.category === 'theme') {
@@ -241,13 +247,17 @@ export function ShopView({
               const owned = myItems.includes(item.id);
               const equipped = isEquipped(item);
               const isBuying = buying === item.id;
+              const locked = isGoldLocked(item);
               const label = getButtonLabel(item);
 
               return (
-                <View key={item.id} style={[styles.itemCard, equipped && styles.itemCardEquipped]}>
-                  <Text style={styles.itemEmoji}>{item.emoji}</Text>
+                <View key={item.id} style={[styles.itemCard, equipped && styles.itemCardEquipped, locked && styles.itemCardLocked]}>
+                  <Text style={[styles.itemEmoji, locked && styles.itemEmojiLocked]}>{item.emoji}</Text>
                   <View style={styles.itemInfo}>
-                    <Text style={styles.itemName}>{item.name}</Text>
+                    <View style={styles.itemNameRow}>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      {item.is_gold_only && <Text style={styles.goldOnlyTag}>⭐</Text>}
+                    </View>
                     {item.description && (
                       <Text style={styles.itemDesc}>{item.description}</Text>
                     )}
@@ -255,11 +265,13 @@ export function ShopView({
                   <TouchableOpacity
                     style={[
                       styles.actionBtn,
+                      locked && styles.actionBtnLocked,
                       owned && !equipped && styles.actionBtnOwned,
                       equipped && styles.actionBtnEquipped,
                     ]}
-                    disabled={equipped || isBuying || (item.category === 'pet_name' && owned)}
+                    disabled={locked || equipped || isBuying || (item.category === 'pet_name' && owned)}
                     onPress={() => {
+                      if (locked) return;
                       if (!owned) {
                         handleBuy(item);
                       } else if (item.category === 'theme') {
@@ -428,19 +440,34 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     backgroundColor: colors.primaryLight,
   },
+  itemCardLocked: {
+    opacity: 0.65,
+    backgroundColor: colors.cardAlt,
+  },
   itemEmoji: {
     fontSize: 32,
     width: 40,
     textAlign: 'center',
   },
+  itemEmojiLocked: {
+    opacity: 0.5,
+  },
   itemInfo: {
     flex: 1,
     gap: 3,
+  },
+  itemNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   itemName: {
     fontSize: 15,
     fontWeight: '700',
     color: colors.text,
+  },
+  goldOnlyTag: {
+    fontSize: 13,
   },
   itemDesc: {
     fontSize: 12,
@@ -460,6 +487,11 @@ const styles = StyleSheet.create({
   },
   actionBtnEquipped: {
     backgroundColor: colors.primaryLight,
+  },
+  actionBtnLocked: {
+    backgroundColor: '#FFF3CD',
+    borderWidth: 1,
+    borderColor: '#F0C040',
   },
   actionBtnText: {
     fontSize: 13,

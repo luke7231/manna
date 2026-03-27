@@ -5,11 +5,14 @@ import {
   StyleSheet,
   FlatList,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { HistoryItem } from '../../src/features/history/HistoryItem';
 import { LoadingView } from '../../src/components/LoadingView';
 import { EmptyState } from '../../src/components/EmptyState';
+import { GoldBadge } from '../../src/components/GoldBadge';
 import { colors } from '../../src/lib/constants/colors';
 import {
   getHistoryQuestions,
@@ -19,11 +22,16 @@ import {
 import { getPartnerId } from '../../src/lib/supabase/pairing';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
+import { useGoldStatus } from '../../src/hooks/useGoldStatus';
 import { DailyQuestion, Answer, HistoryItem as HistoryItemType } from '../../src/types';
+
+const FREE_HISTORY_LIMIT = 30; // 무료: 최근 30개
 
 export default function HistoryScreen() {
   const { user } = useAuthStore();
   const { profile, pair } = useProfileStore();
+  const { isGold } = useGoldStatus();
+  const router = useRouter();
 
   const [items, setItems] = useState<HistoryItemType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +43,9 @@ export default function HistoryScreen() {
   const loadHistory = useCallback(async () => {
     if (!user) return;
 
-    const dailyQuestions: DailyQuestion[] = await getHistoryQuestions(30);
+    // 골드: 무제한, 무료: 최근 30개
+    const limit = isGold ? 0 : FREE_HISTORY_LIMIT; // 0 = no limit in query
+    const dailyQuestions: DailyQuestion[] = await getHistoryQuestions(isGold ? 9999 : FREE_HISTORY_LIMIT);
     if (dailyQuestions.length === 0) {
       setItems([]);
       setLoading(false);
@@ -83,8 +93,18 @@ export default function HistoryScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>히스토리</Text>
-        <Text style={styles.headerSub}>지난 질문과 답변을 돌아봐요</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>히스토리</Text>
+          {isGold && <GoldBadge size="sm" />}
+        </View>
+        <Text style={styles.headerSub}>
+          {isGold ? '전체 기록을 볼 수 있어요' : `최근 ${FREE_HISTORY_LIMIT}일 기록을 볼 수 있어요`}
+        </Text>
+        {!isGold && (
+          <TouchableOpacity onPress={() => router.push('/(app)/gold')} style={styles.goldNudge}>
+            <Text style={styles.goldNudgeText}>⭐ 골드로 히스토리 무제한 보기 →</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <FlatList
@@ -124,7 +144,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 16,
-    gap: 4,
+    gap: 6,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   headerTitle: {
     fontSize: 24,
@@ -134,6 +159,14 @@ const styles = StyleSheet.create({
   headerSub: {
     fontSize: 13,
     color: colors.textMuted,
+  },
+  goldNudge: {
+    marginTop: 4,
+  },
+  goldNudgeText: {
+    fontSize: 13,
+    color: '#8B6A00',
+    fontWeight: '600',
   },
   listContent: {
     paddingHorizontal: 20,

@@ -30,6 +30,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "expo-image-picker",
       [
         "expo-notifications",
         {
@@ -44,7 +45,8 @@
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
-      ]
+      ],
+      "react-native-purchases"
     ],
     "experiments": {
       "typedRoutes": true

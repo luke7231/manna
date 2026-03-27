@@ -264,19 +264,35 @@ CREATE POLICY "pair_invites_delete_creator"
   USING (auth.uid() = created_by);
 
 -- ───────────────────────────────────────────────────────────
--- 9. SHOP — 방꾸미기 시스템
+-- 9. GOLD — 만나골드 구독 상태
+-- ───────────────────────────────────────────────────────────
+-- profiles에 골드 구독 상태 추가 (RevenueCat webhook이 업데이트)
+-- is_gold: 현재 활성 구독 여부
+-- gold_expires_at: 구독 만료 시각 (갱신/취소 추적)
+
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS is_gold          BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS gold_expires_at  TIMESTAMPTZ;
+
+-- 답변 이미지 (골드 전용 기능)
+ALTER TABLE answers
+  ADD COLUMN IF NOT EXISTS image_url TEXT;
+
+-- ───────────────────────────────────────────────────────────
+-- 10. SHOP — 방꾸미기 시스템
 -- ───────────────────────────────────────────────────────────
 
 -- 상점 아이템 (관리자 seed로 등록)
 CREATE TABLE IF NOT EXISTS shop_items (
-  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  category    TEXT NOT NULL CHECK (category IN ('theme', 'furniture', 'pet_name')),
-  name        TEXT NOT NULL,
-  description TEXT,
-  price       INT NOT NULL,
-  emoji       TEXT,
-  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
-  sort_order  INT NOT NULL DEFAULT 0
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  category     TEXT NOT NULL CHECK (category IN ('theme', 'furniture', 'pet_name')),
+  name         TEXT NOT NULL,
+  description  TEXT,
+  price        INT NOT NULL,
+  emoji        TEXT,
+  is_active    BOOLEAN NOT NULL DEFAULT TRUE,
+  is_gold_only BOOLEAN NOT NULL DEFAULT FALSE,
+  sort_order   INT NOT NULL DEFAULT 0
 );
 
 -- 커플이 구매한 아이템

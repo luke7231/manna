@@ -3,9 +3,11 @@ import { View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { ADS_ENABLED, AD_UNIT_IDS } from '../lib/ads';
 import { colors } from '../lib/constants/colors';
+import { useGoldStatus } from '../hooks/useGoldStatus';
 
 export function BannerAdView() {
-  if (!ADS_ENABLED) return null;
+  const { isGold } = useGoldStatus();
+  if (!ADS_ENABLED || isGold) return null;
 
   return (
     <View style={{ alignItems: 'center', backgroundColor: colors.card }}>

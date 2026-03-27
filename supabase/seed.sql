@@ -177,3 +177,11 @@ INSERT INTO shop_items (id, category, name, description, price, emoji, sort_orde
 -- 이름 변경권 (pet_name)
 ('00000000-0000-0000-0012-000000000001', 'pet_name',  '이름 변경권',   '반려몽의 이름을 바꿀 수 있어요',           100, '✏️', 0)
 ON CONFLICT (id) DO NOTHING;
+
+-- 골드 전용 아이템 (is_gold_only = TRUE, 가격 0 = 골드 구독 중이면 무료)
+INSERT INTO shop_items (id, category, name, description, price, emoji, is_gold_only, sort_order) VALUES
+('00000000-0000-0000-0010-000000000005', 'theme',     '황금빛 방',     '럭셔리한 골드 분위기의 방이에요',     0,  '🌟', TRUE, 10),
+('00000000-0000-0000-0010-000000000006', 'theme',     '달빛 정원',     '달빛이 가득한 낭만적인 정원이에요',   0,  '🌙', TRUE, 11),
+('00000000-0000-0000-0011-000000000008', 'furniture', '크리스탈 조명', '반짝이는 크리스탈 조명이에요',        0,  '💎', TRUE, 10),
+('00000000-0000-0000-0011-000000000009', 'furniture', '하트 쿠션',     '사랑스러운 하트 쿠션이에요',          0,  '🩷', TRUE, 11)
+ON CONFLICT (id) DO NOTHING;
