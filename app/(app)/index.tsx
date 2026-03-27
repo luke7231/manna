@@ -14,18 +14,21 @@ import { AnswerStatus } from '../../src/features/home/AnswerStatus';
 import { LoadingView } from '../../src/components/LoadingView';
 import { EmptyState } from '../../src/components/EmptyState';
 import { Button } from '../../src/components/Button';
+import { PebblesDisplay } from '../../src/components/PebblesDisplay';
 import { colors } from '../../src/lib/constants/colors';
 import { getTodayQuestion } from '../../src/lib/supabase/questions';
 import { getMyAnswer, getPartnerAnswer } from '../../src/lib/supabase/answers';
-import { getPartnerId } from '../../src/lib/supabase/pairing';
+import { getPartnerId, addPebbles } from '../../src/lib/supabase/pairing';
+import { checkAndAwardAttendance } from '../../src/lib/supabase/profile';
 import { formatTodayFull } from '../../src/lib/utils/date';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
+import { useRewardedAd } from '../../src/hooks/useRewardedAd';
 import { DailyQuestion, Answer } from '../../src/types';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
-  const { profile, pair } = useProfileStore();
+  const { profile, pair, setPair } = useProfileStore();
   const router = useRouter();
 
   const [dailyQuestion, setDailyQuestion] = useState<DailyQuestion | null>(null);
@@ -36,6 +39,20 @@ export default function HomeScreen() {
 
   const isConnected = pair?.status === 'connected';
   const partnerId = pair && user ? getPartnerId(pair, user.id) : null;
+
+  // 리워드 광고 — 시청 완료 시 만나돌 +10
+  const { load: loadAd, show: showAd, loaded: adLoaded } = useRewardedAd(
+    useCallback(() => {
+      if (!pair) return;
+      addPebbles(pair.id, 10).then((newBalance) => {
+        setPair({ ...pair, pebbles: newBalance });
+      });
+    }, [pair])
+  );
+
+  useEffect(() => {
+    loadAd();
+  }, []);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -55,12 +72,21 @@ export default function HomeScreen() {
     setLoading(false);
   }, [user, partnerId]);
 
-  // Reload when screen comes into focus (e.g. after writing an answer)
+  // 화면 포커스 시 데이터 로드 + 출석 체크
   useFocusEffect(
     useCallback(() => {
       setLoading(true);
       loadData();
-    }, [loadData])
+
+      // 출석 보상 — 연결된 커플이 있을 때만
+      if (user && pair?.status === 'connected') {
+        checkAndAwardAttendance(user.id, pair.id, addPebbles).then((awarded) => {
+          if (awarded > 0) {
+            setPair({ ...pair, pebbles: (pair.pebbles ?? 0) + awarded });
+          }
+        });
+      }
+    }, [loadData, user, pair])
   );
 
   const handleRefresh = async () => {
@@ -88,13 +114,32 @@ export default function HomeScreen() {
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
     >
-      {/* Top greeting */}
-      <View style={styles.greeting}>
-        <Text style={styles.greetingName}>
-          {profile?.name ? `안녕하세요, ${profile.name} 👋` : '안녕하세요 👋'}
-        </Text>
-        <Text style={styles.todayDate}>{formatTodayFull()}</Text>
+      {/* Top greeting + 만나돌 잔액 */}
+      <View style={styles.greetingRow}>
+        <View style={styles.greeting}>
+          <Text style={styles.greetingName}>
+            {profile?.name ? `안녕하세요, ${profile.name} 👋` : '안녕하세요 👋'}
+          </Text>
+          <Text style={styles.todayDate}>{formatTodayFull()}</Text>
+        </View>
+        {isConnected && (
+          <PebblesDisplay amount={pair?.pebbles ?? 0} />
+        )}
       </View>
+
+      {/* 리워드 광고 버튼 (연결된 커플만) */}
+      {isConnected && (
+        <TouchableOpacity
+          style={[styles.adButton, !adLoaded && styles.adButtonDisabled]}
+          onPress={showAd}
+          disabled={!adLoaded}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.adButtonText}>
+            {adLoaded ? '📺 광고 보고 만나돌 +10 받기' : '광고 준비 중...'}
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {/* Today's question or empty state */}
       {dailyQuestion ? (
@@ -178,9 +223,15 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 12,
   },
-  greeting: {
+  greetingRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  greeting: {
     gap: 4,
+    flex: 1,
   },
   greetingName: {
     fontSize: 20,
@@ -190,6 +241,21 @@ const styles = StyleSheet.create({
   todayDate: {
     fontSize: 13,
     color: colors.textMuted,
+  },
+  adButton: {
+    backgroundColor: colors.accentLight,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  adButtonDisabled: {
+    opacity: 0.5,
+  },
+  adButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.accent,
   },
   sectionHeader: {
     marginTop: 4,

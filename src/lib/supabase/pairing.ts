@@ -141,6 +141,18 @@ export function getPartnerId(pair: Pair, myUserId: string): string | null {
   return pair.user1_id;
 }
 
+/**
+ * 만나돌 원자적 증감 — 두 사람이 동시에 호출해도 안전
+ * @returns 업데이트 후 새 잔액
+ */
+export async function addPebbles(pairId: string, amount: number): Promise<number> {
+  const { data } = await supabase.rpc('add_pebbles', {
+    p_pair_id: pairId,
+    p_amount: amount,
+  });
+  return (data as number) ?? 0;
+}
+
 export async function updateNotificationTime(
   pairId: string,
   hour: number,

@@ -18,7 +18,7 @@ import { colors } from '../src/lib/constants/colors';
 import { getMyAnswer, upsertAnswer } from '../src/lib/supabase/answers';
 import { getPartnerPushToken } from '../src/lib/supabase/profile';
 import { sendAnswerNotification } from '../src/lib/notifications';
-import { getPartnerId } from '../src/lib/supabase/pairing';
+import { getPartnerId, addPebbles } from '../src/lib/supabase/pairing';
 import { useAuthStore } from '../src/stores/authStore';
 import { useProfileStore } from '../src/stores/profileStore';
 
@@ -28,7 +28,7 @@ export default function AnswerScreen() {
     questionContent: string;
   }>();
   const { user } = useAuthStore();
-  const { profile, pair } = useProfileStore();
+  const { profile, pair, setPair, refreshPair } = useProfileStore();
   const router = useRouter();
 
   const [answerText, setAnswerText] = useState('');
@@ -66,8 +66,14 @@ export default function AnswerScreen() {
       return;
     }
 
-    // 신규 작성 시만 연인에게 푸시 알림 발송 (수정 시에는 미발송)
+    // 신규 작성 시만 (수정 시에는 미적용)
     if (!isEditing && pair && profile) {
+      // 만나돌 +5 지급
+      addPebbles(pair.id, 5).then((newBalance) => {
+        setPair({ ...pair, pebbles: newBalance });
+      });
+
+      // 연인에게 푸시 알림 발송
       const partnerId = getPartnerId(pair, user!.id);
       if (partnerId) {
         getPartnerPushToken(partnerId).then((token) => {

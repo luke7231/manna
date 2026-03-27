@@ -38,6 +38,31 @@ export async function getPartnerPushToken(partnerId: string): Promise<string | n
   return data?.push_token ?? null;
 }
 
+/**
+ * 출석 체크 — 오늘 아직 출석 보상을 받지 않은 경우에만 지급
+ * @returns 지급된 만나돌 수 (0이면 이미 오늘 수령 완료)
+ */
+export async function checkAndAwardAttendance(
+  userId: string,
+  pairId: string,
+  addPebblesFn: (pairId: string, amount: number) => Promise<number>
+): Promise<number> {
+  const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('attendance_date')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.attendance_date === today) return 0; // 이미 오늘 수령
+
+  // 출석 날짜 업데이트 + 만나돌 지급
+  await supabase.from('profiles').update({ attendance_date: today }).eq('id', userId);
+  await addPebblesFn(pairId, 3);
+  return 3;
+}
+
 export async function completeOnboarding(
   userId: string,
   name: string,

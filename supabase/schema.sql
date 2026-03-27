@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   partner_name          TEXT,
   onboarding_completed  BOOLEAN NOT NULL DEFAULT FALSE,
   push_token            TEXT,
+  attendance_date       DATE,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS pairs (
                         CHECK (status IN ('pending', 'connected')),
   notification_hour   INT NOT NULL DEFAULT 9,
   notification_minute INT NOT NULL DEFAULT 0,
+  pebbles             INT NOT NULL DEFAULT 0,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -82,7 +84,19 @@ CREATE TABLE IF NOT EXISTS answers (
 );
 
 -- ───────────────────────────────────────────────────────────
--- 7. updated_at AUTO-TRIGGER
+-- 7. PEBBLES RPC — 원자적 만나돌 증감 (race condition 방지)
+-- ───────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION add_pebbles(p_pair_id UUID, p_amount INT)
+RETURNS INT LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE v_new INT;
+BEGIN
+  UPDATE pairs SET pebbles = pebbles + p_amount WHERE id = p_pair_id
+  RETURNING pebbles INTO v_new;
+  RETURN v_new;
+END; $$;
+
+-- ───────────────────────────────────────────────────────────
+-- 8. updated_at AUTO-TRIGGER
 -- ───────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

@@ -10,6 +10,7 @@ interface ProfileState {
   loading: boolean;
 
   loadProfile: (userId: string) => Promise<void>;
+  refreshPair: (userId: string) => Promise<void>;
   setProfile: (profile: Profile) => void;
   setPair: (pair: Pair | null) => void;
   reset: () => void;
@@ -28,6 +29,11 @@ export const useProfileStore = create<ProfileState>((set) => ({
       getUserPair(userId),
     ]);
     set({ profile, pair, initialized: true, loading: false });
+  },
+
+  refreshPair: async (userId: string) => {
+    const pair = await getUserPair(userId);
+    set({ pair });
   },
 
   setProfile: (profile) => set({ profile }),

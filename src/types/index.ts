@@ -5,6 +5,7 @@ export interface Profile {
   partner_name: string | null;
   onboarding_completed: boolean;
   push_token: string | null;
+  attendance_date: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -41,6 +42,7 @@ export interface Pair {
   status: 'pending' | 'connected';
   notification_hour: number;
   notification_minute: number;
+  pebbles: number;
   created_at: string;
   updated_at: string;
 }
