@@ -96,6 +96,30 @@ BEGIN
 END; $$;
 
 -- ───────────────────────────────────────────────────────────
+-- 8. PETS — 커플 공동 반려몽
+-- ───────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS pets (
+  id             UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  pair_id        UUID REFERENCES pairs(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  name           TEXT NOT NULL DEFAULT '반려몽',
+  total_answers  INT NOT NULL DEFAULT 0,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 답변 저장 시 total_answers 원자적 증가 + 없으면 생성
+CREATE OR REPLACE FUNCTION increment_pet_answers(p_pair_id UUID)
+RETURNS INT LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE v_total INT;
+BEGIN
+  INSERT INTO pets (pair_id, total_answers)
+    VALUES (p_pair_id, 1)
+  ON CONFLICT (pair_id) DO UPDATE
+    SET total_answers = pets.total_answers + 1
+  RETURNING total_answers INTO v_total;
+  RETURN v_total;
+END; $$;
+
+-- ───────────────────────────────────────────────────────────
 -- 8. updated_at AUTO-TRIGGER
 -- ───────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -127,6 +151,25 @@ ALTER TABLE pair_invites    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE questions       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE answers         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pets            ENABLE ROW LEVEL SECURITY;
+
+-- PETS: pair members read/write
+CREATE POLICY "pets_member_all"
+  ON pets FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM pairs
+      WHERE pairs.id = pets.pair_id
+        AND (pairs.user1_id = auth.uid() OR pairs.user2_id = auth.uid())
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM pairs
+      WHERE pairs.id = pets.pair_id
+        AND (pairs.user1_id = auth.uid() OR pairs.user2_id = auth.uid())
+    )
+  );
 
 -- PROFILES: own row only; connected partner can read (for push_token)
 CREATE POLICY "profiles_select_own"

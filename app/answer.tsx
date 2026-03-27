@@ -19,6 +19,7 @@ import { getMyAnswer, upsertAnswer } from '../src/lib/supabase/answers';
 import { getPartnerPushToken } from '../src/lib/supabase/profile';
 import { sendAnswerNotification } from '../src/lib/notifications';
 import { getPartnerId, addPebbles } from '../src/lib/supabase/pairing';
+import { incrementPetAnswers } from '../src/lib/supabase/pet';
 import { useAuthStore } from '../src/stores/authStore';
 import { useProfileStore } from '../src/stores/profileStore';
 
@@ -72,6 +73,9 @@ export default function AnswerScreen() {
       addPebbles(pair.id, 5).then((newBalance) => {
         setPair({ ...pair, pebbles: newBalance });
       });
+
+      // 반려몽 답변 수 +1
+      incrementPetAnswers(pair.id);
 
       // 연인에게 푸시 알림 발송
       const partnerId = getPartnerId(pair, user!.id);

@@ -52,6 +52,13 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="us"
+        options={{
+          title: '우리',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🐣" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="pairing"
         options={{
           title: '연결',
