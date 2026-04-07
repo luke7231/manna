@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Pet, PET_STAGES, getPetStage } from '../../types';
 import { colors } from '../../lib/constants/colors';
 
@@ -9,11 +10,22 @@ interface PetDisplayProps {
 }
 
 export function PetDisplay({ pet, onRename }: PetDisplayProps) {
+  const { t } = useTranslation();
   const stageIndex = getPetStage(pet.total_answers);
   const current = PET_STAGES[stageIndex];
   const isMaxStage = stageIndex === PET_STAGES.length - 1;
 
-  // 현재 단계 내 진행률
+  const stageNames = [
+    t('spirit.stage0'),
+    t('spirit.stage1'),
+    t('spirit.stage2'),
+    t('spirit.stage3'),
+    t('spirit.stage4'),
+  ];
+  const stageName = stageNames[stageIndex];
+  const nextStageName = stageIndex < stageNames.length - 1 ? stageNames[stageIndex + 1] : null;
+
+  // Progress within current stage
   const stageStart = stageIndex === 0 ? 0 : PET_STAGES[stageIndex - 1].next ?? 0;
   const stageEnd = current.next ?? pet.total_answers;
   const stageProgress = pet.total_answers - stageStart;
@@ -22,19 +34,16 @@ export function PetDisplay({ pet, onRename }: PetDisplayProps) {
 
   return (
     <View style={styles.container}>
-      {/* 반려몽 이모지 */}
       <Text style={styles.petEmoji}>{current.emoji}</Text>
 
-      {/* 이름 + 단계 */}
       <TouchableOpacity onPress={onRename} disabled={!onRename}>
         <Text style={styles.petName}>{pet.name} {onRename ? '✏️' : ''}</Text>
       </TouchableOpacity>
-      <Text style={styles.stageLabel}>{current.label} 단계</Text>
+      <Text style={styles.stageLabel}>{stageName}</Text>
 
-      {/* 성장 진행 바 */}
       {isMaxStage ? (
         <View style={styles.maxStageRow}>
-          <Text style={styles.maxStageText}>완전히 성장했어요 🎉</Text>
+          <Text style={styles.maxStageText}>{t('spirit.maxStage')}</Text>
         </View>
       ) : (
         <View style={styles.progressSection}>
@@ -42,13 +51,13 @@ export function PetDisplay({ pet, onRename }: PetDisplayProps) {
             <View style={[styles.progressFill, { width: `${progressRatio * 100}%` }]} />
           </View>
           <Text style={styles.progressText}>
-            {stageProgress} / {stageTotal} 답변 → {PET_STAGES[stageIndex + 1]?.label}
+            {t('spirit.progressLabel', { current: stageProgress, next: stageTotal })}
+            {nextStageName ? ` → ${nextStageName}` : ''}
           </Text>
         </View>
       )}
 
-      {/* 총 답변 수 */}
-      <Text style={styles.totalAnswers}>총 {pet.total_answers}개의 답변으로 함께 자라고 있어요</Text>
+      <Text style={styles.totalAnswers}>{t('spirit.growTip')}</Text>
     </View>
   );
 }

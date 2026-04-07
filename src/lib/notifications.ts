@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import i18n from './i18n';
 
 export async function registerForPushNotifications(): Promise<string | null> {
   if (Platform.OS === 'web') return null;
@@ -37,8 +38,8 @@ export async function scheduleDailyQuestionNotification(
     await Notifications.scheduleNotificationAsync({
       identifier: DAILY_NOTIF_ID,
       content: {
-        title: '오늘의 질문이 도착했어요 💌',
-        body: '지금 바로 오늘의 질문에 답변해보세요',
+        title: i18n.t('notifications.dailyTitle'),
+        body: i18n.t('notifications.dailyBody'),
         sound: true,
       },
       trigger: {
@@ -48,7 +49,7 @@ export async function scheduleDailyQuestionNotification(
       },
     });
   } catch {
-    // 스케줄 실패해도 앱 흐름에 영향 없음
+    // schedule failure doesn't affect app flow
   }
 }
 
@@ -66,12 +67,12 @@ export async function sendAnswerNotification(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         to: pushToken,
-        title: '💌 오늘의 답변',
-        body: `${senderName}이(가) 오늘의 질문에 답변했어요`,
+        title: i18n.t('notifications.answerTitle'),
+        body: i18n.t('notifications.answerBody', { name: senderName }),
         sound: 'default',
       }),
     });
   } catch {
-    // fire-and-forget: 알림 전송 실패해도 앱 흐름에 영향 없음
+    // fire-and-forget
   }
 }

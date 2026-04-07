@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { colors } from '../../lib/constants/colors';
@@ -20,6 +21,7 @@ interface InviteCodePanelProps {
 }
 
 export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCodePanelProps) {
+  const { t } = useTranslation();
   const [myCode, setMyCode] = useState<string | null>(existingCode ?? null);
   const [inputCode, setInputCode] = useState('');
   const [generatingCode, setGeneratingCode] = useState(false);
@@ -30,7 +32,7 @@ export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCod
     const { code, error } = await generateInviteCode(userId);
     setGeneratingCode(false);
     if (error || !code) {
-      Alert.alert('오류', '코드 생성에 실패했어요. 다시 시도해주세요.');
+      Alert.alert(t('common.error'));
       return;
     }
     setMyCode(code);
@@ -39,25 +41,30 @@ export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCod
   const handleShareCode = async () => {
     if (!myCode) return;
     await Share.share({
-      message: `Manna 앱에서 나와 연결하려면 이 코드를 입력해줘 💌\n\n초대 코드: ${myCode}\n\n앱 다운로드: manna://`,
+      message: `Connect with me on Manna 💌\n\nInvite code: ${myCode}\n\nDownload: manna://`,
     });
   };
 
   const handleConnect = async () => {
     const trimmed = inputCode.trim().toUpperCase();
     if (trimmed.length !== 6) {
-      Alert.alert('오류', '6자리 코드를 입력해주세요.');
+      Alert.alert(t('common.error'));
       return;
     }
     setConnecting(true);
     const { success, error } = await connectWithCode(userId, trimmed);
     setConnecting(false);
     if (!success) {
-      Alert.alert('연결 실패', error ?? '알 수 없는 오류가 발생했어요.');
+      const msg = error === 'code_not_found'
+        ? t('pairing.codeNotFound')
+        : error === 'already_connected'
+          ? t('pairing.alreadyConnected')
+          : t('pairing.connectError');
+      Alert.alert(t('pairing.connectError'), msg);
       return;
     }
-    Alert.alert('연결 완료! 🎉', '상대방과 연결되었어요. 이제 서로의 답변을 볼 수 있어요.', [
-      { text: '확인', onPress: onConnected },
+    Alert.alert(t('pairing.connectedTitle'), t('pairing.connectedDesc'), [
+      { text: t('common.confirm'), onPress: onConnected },
     ]);
   };
 
@@ -65,10 +72,8 @@ export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCod
     <View style={styles.container}>
       {/* My invite code section */}
       <Card style={styles.section} padding={20}>
-        <Text style={styles.sectionTitle}>내 초대 코드</Text>
-        <Text style={styles.sectionDesc}>
-          코드를 상대방에게 공유하면{'\n'}연결을 시작할 수 있어요
-        </Text>
+        <Text style={styles.sectionTitle}>{t('pairing.codeLabel')}</Text>
+        <Text style={styles.sectionDesc}>{t('pairing.codeDesc')}</Text>
         {myCode ? (
           <View style={styles.codeBox}>
             <Text style={styles.codeText}>{myCode}</Text>
@@ -76,7 +81,7 @@ export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCod
         ) : null}
         <View style={styles.buttonRow}>
           <Button
-            title={myCode ? '새 코드 생성' : '코드 생성하기'}
+            title={myCode ? t('pairing.newCodeBtn') : t('pairing.generateBtn')}
             variant={myCode ? 'secondary' : 'primary'}
             onPress={handleGenerateCode}
             loading={generatingCode}
@@ -84,7 +89,7 @@ export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCod
           />
           {myCode && (
             <Button
-              title="공유"
+              title={t('pairing.shareBtn')}
               variant="primary"
               onPress={handleShareCode}
               style={styles.flex}
@@ -95,26 +100,26 @@ export function InviteCodePanel({ userId, existingCode, onConnected }: InviteCod
 
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>또는</Text>
+        <Text style={styles.dividerText}>{t('common.or')}</Text>
         <View style={styles.dividerLine} />
       </View>
 
       {/* Enter partner's code section */}
       <Card style={styles.section} padding={20}>
-        <Text style={styles.sectionTitle}>코드 입력</Text>
-        <Text style={styles.sectionDesc}>상대방의 초대 코드 6자리를 입력해주세요</Text>
+        <Text style={styles.sectionTitle}>{t('pairing.enterCodeLabel')}</Text>
+        <Text style={styles.sectionDesc}>{t('pairing.enterCodeDesc')}</Text>
         <TextInput
           style={styles.codeInput}
           value={inputCode}
-          onChangeText={(t) => setInputCode(t.toUpperCase())}
-          placeholder="예: AB3K9P"
+          onChangeText={(text) => setInputCode(text.toUpperCase())}
+          placeholder={t('pairing.enterCodePlaceholder')}
           placeholderTextColor={colors.textLight}
           maxLength={6}
           autoCapitalize="characters"
           autoCorrect={false}
         />
         <Button
-          title="연결하기"
+          title={t('pairing.connectBtn')}
           onPress={handleConnect}
           loading={connecting}
           disabled={inputCode.trim().length < 6}

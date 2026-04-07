@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../src/components/Button';
 import { colors } from '../../src/lib/constants/colors';
 import { verifyOtp, sendOtp } from '../../src/lib/supabase/auth';
@@ -24,11 +25,12 @@ export default function VerifyScreen() {
   const inputRef = useRef<TextInput>(null);
   const router = useRouter();
   const { setSession } = useAuthStore();
+  const { t } = useTranslation();
 
   const handleVerify = async () => {
     const trimmed = code.trim();
     if (trimmed.length !== 6) {
-      Alert.alert('오류', '6자리 인증 코드를 입력해주세요.');
+      Alert.alert(t('auth.otpError'));
       return;
     }
     setLoading(true);
@@ -36,7 +38,7 @@ export default function VerifyScreen() {
     setLoading(false);
 
     if (error || !session) {
-      Alert.alert('인증 실패', '코드가 올바르지 않거나 만료되었어요. 다시 확인해주세요.');
+      Alert.alert(t('auth.otpError'));
       return;
     }
 
@@ -49,9 +51,9 @@ export default function VerifyScreen() {
     const { error } = await sendOtp(email);
     setResending(false);
     if (error) {
-      Alert.alert('오류', '재전송에 실패했어요. 잠시 후 다시 시도해주세요.');
+      Alert.alert(t('auth.sendError'));
     } else {
-      Alert.alert('완료', '인증 코드를 다시 보냈어요 ✉️');
+      Alert.alert(t('auth.otpSent'));
       setCode('');
     }
   };
@@ -66,15 +68,14 @@ export default function VerifyScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>← 돌아가기</Text>
+          <Text style={styles.backText}>← {t('common.back')}</Text>
         </TouchableOpacity>
 
         <View style={styles.content}>
           <Text style={styles.logo}>✦ Manna</Text>
-          <Text style={styles.title}>이메일을 확인해주세요</Text>
+          <Text style={styles.title}>{t('auth.verifyTitle')}</Text>
           <Text style={styles.subtitle}>
-            <Text style={styles.emailBold}>{email}</Text>
-            {'\n'}로 6자리 인증 코드를 보냈어요
+            {t('auth.verifySubtitle', { email })}
           </Text>
 
           <TouchableOpacity onPress={() => inputRef.current?.focus()}>
@@ -82,7 +83,7 @@ export default function VerifyScreen() {
               ref={inputRef}
               style={styles.codeInput}
               value={code}
-              onChangeText={(t) => setCode(t.replace(/\D/g, ''))}
+              onChangeText={(text) => setCode(text.replace(/\D/g, ''))}
               placeholder="000000"
               placeholderTextColor={colors.textLight}
               keyboardType="number-pad"
@@ -92,7 +93,7 @@ export default function VerifyScreen() {
           </TouchableOpacity>
 
           <Button
-            title="확인하기"
+            title={t('auth.verifyBtn')}
             onPress={handleVerify}
             loading={loading}
             disabled={code.length < 6}
@@ -103,7 +104,7 @@ export default function VerifyScreen() {
             <Text style={styles.resendText}>코드를 받지 못하셨나요? </Text>
             <TouchableOpacity onPress={handleResend} disabled={resending}>
               <Text style={styles.resendLink}>
-                {resending ? '전송 중...' : '다시 보내기'}
+                {resending ? t('auth.sendingOtp') : t('auth.resend')}
               </Text>
             </TouchableOpacity>
           </View>

@@ -10,6 +10,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../lib/constants/colors';
 import { ShopItem, Room } from '../../types';
 import { getShopItems, getMyItems, purchaseItem } from '../../lib/supabase/shop';
@@ -17,6 +18,7 @@ import { updateRoomTheme, updateRoomFurniture } from '../../lib/supabase/room';
 import { renamePet } from '../../lib/supabase/pet';
 import { useProfileStore } from '../../stores/profileStore';
 import { useGoldStatus } from '../../hooks/useGoldStatus';
+import i18n from '../../lib/i18n';
 
 type Tab = 'theme' | 'furniture' | 'pet_name';
 
@@ -43,6 +45,7 @@ export function ShopView({
   petId,
   onPetRenamed,
 }: ShopViewProps) {
+  const { t } = useTranslation();
   const { pair, setPair } = useProfileStore();
   const { isGold } = useGoldStatus();
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
@@ -72,7 +75,6 @@ export function ShopView({
   const handleBuy = async (item: ShopItem) => {
     if (!pair) return;
 
-    // 이름 변경권: 구매 전 이름 입력
     if (item.category === 'pet_name') {
       setRenameItemId(item.id);
       setRenameInput('');
@@ -85,11 +87,10 @@ export function ShopView({
     setBuying(null);
 
     if ('error' in result) {
-      const msg =
-        result.error === 'insufficient_pebbles'
-          ? '만나돌이 부족해요 🪨'
-          : '구매 중 오류가 발생했어요';
-      Alert.alert('구매 실패', msg);
+      const msg = result.error === 'insufficient_pebbles'
+        ? t('shop.insufficientPebbles')
+        : t('shop.buyFailed');
+      Alert.alert(t('shop.buyFailed'), msg);
       return;
     }
 
@@ -110,7 +111,6 @@ export function ShopView({
     const current = room.furniture ?? [];
     const alreadyEquipped = current.find((f) => f.item_id === item.id);
     if (alreadyEquipped) {
-      // 이미 배치된 경우 제거
       const updated = current.filter((f) => f.item_id !== item.id);
       await updateRoomFurniture(pairId, updated);
       onRoomUpdated({ ...room, furniture: updated });
@@ -119,14 +119,14 @@ export function ShopView({
       await updateRoomFurniture(pairId, updated);
       onRoomUpdated({ ...room, furniture: updated });
     } else {
-      Alert.alert('슬롯 부족', '가구 슬롯이 가득 찼어요. 기존 가구를 먼저 제거해주세요.');
+      Alert.alert(t('shop.slotFull'));
     }
   };
 
   const handleConfirmRename = async () => {
     const trimmed = renameInput.trim();
     if (!trimmed) {
-      Alert.alert('이름을 입력해주세요');
+      Alert.alert(t('common.error'));
       return;
     }
     if (!renameItemId || !pair) return;
@@ -136,11 +136,10 @@ export function ShopView({
     setBuying(null);
 
     if ('error' in result) {
-      const msg =
-        result.error === 'insufficient_pebbles'
-          ? '만나돌이 부족해요 🪨'
-          : '구매 중 오류가 발생했어요';
-      Alert.alert('구매 실패', msg);
+      const msg = result.error === 'insufficient_pebbles'
+        ? t('shop.insufficientPebbles')
+        : t('shop.buyFailed');
+      Alert.alert(t('shop.buyFailed'), msg);
       setShowRenameInput(false);
       return;
     }
@@ -152,25 +151,24 @@ export function ShopView({
     setMyItems(newMyItems);
     onItemsPurchased(newMyItems);
     setShowRenameInput(false);
-    Alert.alert('완료', `반려몽 이름이 "${trimmed}"(으)로 바뀌었어요!`);
+    Alert.alert(t('shop.renameSuccess', { name: trimmed }));
   };
 
-  const filtered = shopItems.filter((i) => i.category === activeTab);
+  const filtered = shopItems.filter((item) => item.category === activeTab);
 
-  const isGoldLocked = (item: ShopItem): boolean =>
-    item.is_gold_only && !isGold;
+  const isGoldLocked = (item: ShopItem): boolean => item.is_gold_only && !isGold;
 
   const getButtonLabel = (item: ShopItem): string => {
-    if (isGoldLocked(item)) return '⭐ 골드 전용';
+    if (isGoldLocked(item)) return t('shop.goldOnlyBtn');
     const owned = myItems.includes(item.id);
-    if (!owned) return item.price === 0 ? '무료 받기' : `🪨 ${item.price}`;
+    if (!owned) return item.price === 0 ? t('shop.freeBtn') : t('shop.buyBtn', { price: item.price });
     if (item.category === 'theme') {
-      return room?.theme_item_id === item.id ? '✓ 적용 중' : '장착';
+      return room?.theme_item_id === item.id ? t('shop.equippedBtn') : t('shop.equipBtn');
     }
     if (item.category === 'furniture') {
-      return room?.furniture?.find((f) => f.item_id === item.id) ? '✓ 배치 중' : '배치';
+      return room?.furniture?.find((f) => f.item_id === item.id) ? t('shop.equippedBtn') : t('shop.equipBtn');
     }
-    return '보유 중';
+    return t('shop.ownedBtn');
   };
 
   const isEquipped = (item: ShopItem): boolean => {
@@ -180,26 +178,32 @@ export function ShopView({
   };
 
   const TAB_LABELS: Record<Tab, string> = {
-    theme: '테마',
-    furniture: '가구',
-    pet_name: '이름변경',
+    theme: t('shop.tabTheme'),
+    furniture: t('shop.tabFurniture'),
+    pet_name: t('shop.tabPetName'),
   };
+
+  const getItemName = (item: ShopItem) =>
+    i18n.language === 'ko' ? item.name : (item.en_name ?? item.name);
+
+  const getItemDesc = (item: ShopItem) =>
+    i18n.language === 'ko' ? item.description : (item.en_description ?? item.description);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={styles.container}>
-        {/* 헤더 */}
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>상점 🛍️</Text>
+          <Text style={styles.headerTitle}>{t('shop.title')}</Text>
           <View style={styles.balanceRow}>
             <Text style={styles.balanceText}>🪨 {pair?.pebbles ?? 0}</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Text style={styles.closeBtnText}>닫기</Text>
+            <Text style={styles.closeBtnText}>{t('common.close')}</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 탭 */}
+        {/* Tabs */}
         <View style={styles.tabs}>
           {(['theme', 'furniture', 'pet_name'] as Tab[]).map((tab) => (
             <TouchableOpacity
@@ -214,31 +218,31 @@ export function ShopView({
           ))}
         </View>
 
-        {/* 이름 변경 입력 */}
+        {/* Rename input */}
         {showRenameInput && (
           <View style={styles.renameBox}>
-            <Text style={styles.renameLabel}>새 이름을 입력해주세요</Text>
+            <Text style={styles.renameLabel}>{t('shop.renameLabel')}</Text>
             <TextInput
               style={styles.renameInput}
               value={renameInput}
               onChangeText={setRenameInput}
-              placeholder="반려몽 이름"
+              placeholder={t('shop.renamePlaceholder')}
               placeholderTextColor={colors.textLight}
               maxLength={10}
               autoFocus
             />
             <View style={styles.renameActions}>
               <TouchableOpacity style={styles.renameCancelBtn} onPress={() => setShowRenameInput(false)}>
-                <Text style={styles.renameCancelText}>취소</Text>
+                <Text style={styles.renameCancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.renameConfirmBtn} onPress={handleConfirmRename}>
-                <Text style={styles.renameConfirmText}>변경하기</Text>
+                <Text style={styles.renameConfirmText}>{t('shop.renameConfirm')}</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
-        {/* 아이템 목록 */}
+        {/* Items */}
         {loading ? (
           <ActivityIndicator style={styles.loader} color={colors.primary} />
         ) : (
@@ -255,11 +259,11 @@ export function ShopView({
                   <Text style={[styles.itemEmoji, locked && styles.itemEmojiLocked]}>{item.emoji}</Text>
                   <View style={styles.itemInfo}>
                     <View style={styles.itemNameRow}>
-                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemName}>{getItemName(item)}</Text>
                       {item.is_gold_only && <Text style={styles.goldOnlyTag}>⭐</Text>}
                     </View>
                     {item.description && (
-                      <Text style={styles.itemDesc}>{item.description}</Text>
+                      <Text style={styles.itemDesc}>{getItemDesc(item)}</Text>
                     )}
                   </View>
                   <TouchableOpacity

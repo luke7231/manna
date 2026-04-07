@@ -1,15 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../components/Card';
 import { colors } from '../../lib/constants/colors';
 import { Question } from '../../types';
-
-const CATEGORY_LABELS: Record<Question['category'], string> = {
-  faith: '신앙',
-  love: '사랑',
-  values: '가치관',
-  daily: '일상',
-};
 
 const CATEGORY_COLORS: Record<Question['category'], { bg: string; text: string }> = {
   faith: { bg: colors.faithLight, text: colors.faith },
@@ -24,19 +18,23 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, dateLabel }: QuestionCardProps) {
+  const { t, i18n } = useTranslation();
   const categoryStyle = CATEGORY_COLORS[question.category];
+  const content = i18n.language === 'ko'
+    ? question.content
+    : (question.en_content ?? question.content);
 
   return (
     <Card style={styles.card} padding={24}>
       <View style={styles.header}>
         <View style={[styles.categoryBadge, { backgroundColor: categoryStyle.bg }]}>
           <Text style={[styles.categoryText, { color: categoryStyle.text }]}>
-            {CATEGORY_LABELS[question.category]}
+            {t(`category.${question.category}`)}
           </Text>
         </View>
         {dateLabel && <Text style={styles.dateLabel}>{dateLabel}</Text>}
       </View>
-      <Text style={styles.content}>{question.content}</Text>
+      <Text style={styles.content}>{content}</Text>
     </Card>
   );
 }

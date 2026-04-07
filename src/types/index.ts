@@ -16,6 +16,7 @@ export interface Question {
   id: string;
   category: 'faith' | 'love' | 'values' | 'daily';
   content: string;
+  en_content?: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -96,7 +97,9 @@ export interface ShopItem {
   id: string;
   category: 'theme' | 'furniture' | 'pet_name';
   name: string;
+  en_name?: string | null;
   description: string | null;
+  en_description?: string | null;
   price: number;
   emoji: string | null;
   is_active: boolean;

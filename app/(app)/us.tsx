@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { PetDisplay } from '../../src/features/pet/PetDisplay';
 import { RoomView } from '../../src/features/room/RoomView';
 import { ShopView } from '../../src/features/room/ShopView';
@@ -25,6 +26,7 @@ import { Pet, Room, ShopItem } from '../../src/types';
 type ShopTab = 'theme' | 'furniture' | 'pet_name';
 
 export default function UsScreen() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { pair } = useProfileStore();
 
@@ -89,12 +91,12 @@ export default function UsScreen() {
         {/* 헤더 */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>우리</Text>
+            <Text style={styles.headerTitle}>{t('tabs.together')}</Text>
             <Text style={styles.headerSub}>함께 키워가는 공간이에요</Text>
           </View>
           {isConnected && (
             <TouchableOpacity style={styles.shopBtn} onPress={() => openShop('theme')}>
-              <Text style={styles.shopBtnText}>상점 🛍️</Text>
+              <Text style={styles.shopBtnText}>{t('shop.title')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -103,7 +105,7 @@ export default function UsScreen() {
           /* 연결 전 안내 */
           <Card style={styles.emptyCard} padding={24}>
             <Text style={styles.emptyEmoji}>🥚</Text>
-            <Text style={styles.emptyTitle}>연결 후 반려몽이 태어나요</Text>
+            <Text style={styles.emptyTitle}>{t('spirit.connectFirst')}</Text>
             <Text style={styles.emptyDesc}>
               연결 탭에서 상대방과 연결하면{'\n'}반려몽이 알에서 깨어나요!
             </Text>
@@ -112,7 +114,7 @@ export default function UsScreen() {
           <>
             {/* 만나돌 잔액 */}
             <View style={styles.pebblesRow}>
-              <Text style={styles.pebblesLabel}>우리의 만나돌</Text>
+              <Text style={styles.pebblesLabel}>{t('pebbles.ourPebbles')}</Text>
               <PebblesDisplay amount={pair?.pebbles ?? 0} />
             </View>
 

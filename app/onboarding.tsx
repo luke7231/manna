@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../src/components/Input';
 import { Button } from '../src/components/Button';
 import { colors } from '../src/lib/constants/colors';
@@ -26,11 +27,12 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { setProfile } = useProfileStore();
+  const { t } = useTranslation();
 
   const handleNextStep = () => {
     const trimmed = name.trim();
     if (trimmed.length < 1) {
-      setNameError('이름을 입력해주세요.');
+      setNameError(t('onboarding.nameRequired'));
       return;
     }
     setNameError('');
@@ -49,7 +51,7 @@ export default function OnboardingScreen() {
     setLoading(false);
 
     if (error || !data) {
-      Alert.alert('오류', '저장 중 문제가 생겼어요. 다시 시도해주세요.');
+      Alert.alert(t('common.error'));
       return;
     }
 
@@ -62,18 +64,18 @@ export default function OnboardingScreen() {
       return (
         <>
           <Text style={styles.stepLabel}>1 / 2</Text>
-          <Text style={styles.title}>안녕하세요! 👋</Text>
-          <Text style={styles.subtitle}>앱에서 사용할 이름을 알려주세요</Text>
+          <Text style={styles.title}>{t('onboarding.step1Title')}</Text>
+          <Text style={styles.subtitle}>{t('onboarding.step1Subtitle')}</Text>
           <Input
-            label="내 이름"
+            label={t('onboarding.nameLabel')}
             value={name}
-            onChangeText={(t) => { setName(t); setNameError(''); }}
-            placeholder="이름 또는 닉네임"
+            onChangeText={(text) => { setName(text); setNameError(''); }}
+            placeholder={t('onboarding.namePlaceholder')}
             autoFocus
             error={nameError}
           />
           <Button
-            title="다음"
+            title={t('common.next')}
             onPress={handleNextStep}
             size="lg"
             disabled={name.trim().length === 0}
@@ -86,16 +88,16 @@ export default function OnboardingScreen() {
     return (
       <>
         <Text style={styles.stepLabel}>2 / 2</Text>
-        <Text style={styles.title}>연인의 이름은요? 💑</Text>
-        <Text style={styles.subtitle}>입력하지 않아도 괜찮아요 (나중에 변경 가능)</Text>
+        <Text style={styles.title}>{t('onboarding.step2Title')}</Text>
+        <Text style={styles.subtitle}>{t('onboarding.step2Subtitle')}</Text>
         <Input
-          label="연인 이름 (선택)"
+          label={t('onboarding.partnerLabel')}
           value={partnerName}
           onChangeText={setPartnerName}
-          placeholder="연인의 이름 또는 닉네임"
+          placeholder={t('onboarding.partnerPlaceholder')}
         />
         <Button
-          title="시작하기 ✨"
+          title={t('onboarding.startBtn')}
           onPress={handleComplete}
           size="lg"
           loading={loading}

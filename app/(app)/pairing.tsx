@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { InviteCodePanel } from '../../src/features/pairing/InviteCodePanel';
 import { Card } from '../../src/components/Card';
 import { LoadingView } from '../../src/components/LoadingView';
@@ -19,13 +20,14 @@ import { scheduleDailyQuestionNotification } from '../../src/lib/notifications';
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6 ~ 22
 
-function formatHour(hour: number): string {
-  if (hour < 12) return `오전 ${hour}시`;
-  if (hour === 12) return '오후 12시';
-  return `오후 ${hour - 12}시`;
+function formatHour(hour: number, t: ReturnType<typeof useTranslation>['t']): string {
+  if (hour < 12) return t('pairing.amTime', { h: hour });
+  if (hour === 12) return t('pairing.noon');
+  return t('pairing.pmTime', { h: hour - 12 });
 }
 
 export default function PairingScreen() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { profile, pair, setPair, loadProfile } = useProfileStore();
 
@@ -85,30 +87,30 @@ export default function PairingScreen() {
       }
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>연결</Text>
-        <Text style={styles.headerSub}>초대 코드로 상대방과 연결해요</Text>
+        <Text style={styles.headerTitle}>{t('pairing.title')}</Text>
+        <Text style={styles.headerSub}>{t('pairing.subtitle')}</Text>
       </View>
 
       {isConnected ? (
         <>
           <Card style={styles.connectedCard} padding={24}>
             <Text style={styles.connectedEmoji}>💑</Text>
-            <Text style={styles.connectedTitle}>연결되었어요!</Text>
+            <Text style={styles.connectedTitle}>{t('pairing.connectedTitle')}</Text>
             <Text style={styles.connectedDesc}>
               {profile?.partner_name
-                ? `${profile.partner_name}와(과) 연결되어 있어요.\n이제 서로의 답변을 볼 수 있어요 ✨`
-                : '상대방과 연결되어 있어요.\n이제 서로의 답변을 볼 수 있어요 ✨'}
+                ? t('pairing.connectedWith', { name: profile.partner_name })
+                : t('pairing.connectedPartner')}
             </Text>
           </Card>
 
           {/* 알림 시간 선택 */}
           <Card style={styles.notifCard} padding={20}>
-            <Text style={styles.notifTitle}>매일 알림 시간</Text>
+            <Text style={styles.notifTitle}>{t('pairing.notificationTitle')}</Text>
             <Text style={styles.notifDesc}>
-              오늘의 질문 알림을 받을 시간을 선택하세요
+              {t('pairing.notificationDesc')}
             </Text>
             <Text style={styles.currentTime}>
-              현재: {formatHour(pair?.notification_hour ?? 9)}
+              {formatHour(pair?.notification_hour ?? 9, t)}
             </Text>
             <ScrollView
               horizontal
@@ -125,7 +127,7 @@ export default function PairingScreen() {
                     disabled={updatingTime}
                   >
                     <Text style={[styles.hourChipText, selected && styles.hourChipTextSelected]}>
-                      {formatHour(hour)}
+                      {formatHour(hour, t)}
                     </Text>
                   </TouchableOpacity>
                 );

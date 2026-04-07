@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { QuestionCard } from '../../src/features/home/QuestionCard';
 import { AnswerStatus } from '../../src/features/home/AnswerStatus';
@@ -28,6 +29,7 @@ import { useGoldStatus } from '../../src/hooks/useGoldStatus';
 import { DailyQuestion, Answer } from '../../src/types';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { profile, pair, setPair } = useProfileStore();
   const { isGold } = useGoldStatus();
@@ -108,7 +110,7 @@ export default function HomeScreen() {
     });
   };
 
-  if (loading) return <LoadingView message="오늘의 질문을 불러오고 있어요..." />;
+  if (loading) return <LoadingView message={t('home.questionLoading')} />;
 
   return (
     <ScrollView
@@ -120,7 +122,7 @@ export default function HomeScreen() {
       <View style={styles.greetingRow}>
         <View style={styles.greeting}>
           <Text style={styles.greetingName}>
-            {profile?.name ? `안녕하세요, ${profile.name} 👋` : '안녕하세요 👋'}
+            {profile?.name ? t('home.greeting', { name: profile.name }) : t('home.greetingDefault')}
           </Text>
           <Text style={styles.todayDate}>{formatTodayFull()}</Text>
         </View>
@@ -138,7 +140,7 @@ export default function HomeScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.adButtonText}>
-            {adLoaded ? '📺 광고 보고 만나돌 +10 받기' : '광고 준비 중...'}
+            {adLoaded ? t('home.adButton') : t('home.adLoading')}
           </Text>
         </TouchableOpacity>
       )}
@@ -147,17 +149,17 @@ export default function HomeScreen() {
       {dailyQuestion ? (
         <>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>오늘의 질문</Text>
+            <Text style={styles.sectionTitle}>{t('home.todayQuestion')}</Text>
           </View>
 
           <QuestionCard question={dailyQuestion.question} />
 
           {/* My answer */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>내 답변</Text>
+            <Text style={styles.sectionTitle}>{t('home.myAnswer')}</Text>
           </View>
           <AnswerStatus
-            label="나"
+            label={t('home.myAnswer')}
             answer={myAnswer}
             isMe
             onPress={handleAnswerPress}
@@ -166,11 +168,11 @@ export default function HomeScreen() {
           {/* Partner answer */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
-              {profile?.partner_name ? `${profile.partner_name}의 답변` : '상대방 답변'}
+              {profile?.partner_name ? t('home.partnerAnswer', { name: profile.partner_name }) : t('home.partnerAnswerDefault')}
             </Text>
           </View>
           <AnswerStatus
-            label={profile?.partner_name ?? '상대방'}
+            label={profile?.partner_name ?? t('home.partnerAnswerDefault')}
             answer={partnerAnswer}
             isConnected={isConnected}
             myAnswerExists={!!myAnswer}
@@ -184,7 +186,7 @@ export default function HomeScreen() {
               activeOpacity={0.8}
             >
               <Text style={styles.connectNudgeText}>
-                💌 상대방과 연결하고 서로의 답변을 확인해보세요
+                {t('home.connectNudge')}
               </Text>
               <Text style={styles.connectNudgeArrow}>→</Text>
             </TouchableOpacity>
@@ -193,10 +195,10 @@ export default function HomeScreen() {
       ) : (
         <EmptyState
           emoji="☀️"
-          title="오늘의 질문 준비 중이에요"
-          description="잠시 후 다시 확인해주세요"
+          title={t('home.noQuestion')}
+          description={t('home.noQuestionDesc')}
           action={
-            <Button title="새로고침" variant="secondary" onPress={handleRefresh} />
+            <Button title={t('common.refresh')} variant="secondary" onPress={handleRefresh} />
           }
         />
       )}
@@ -207,7 +209,7 @@ export default function HomeScreen() {
         onPress={() => router.push('/(app)/history')}
         activeOpacity={0.8}
       >
-        <Text style={styles.historyShortcutText}>📖 지난 질문 보기</Text>
+        <Text style={styles.historyShortcutText}>{t('home.historyShortcut')}</Text>
         <Text style={styles.historyShortcutArrow}>→</Text>
       </TouchableOpacity>
     </ScrollView>

@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS questions (
   category    TEXT NOT NULL
                 CHECK (category IN ('faith', 'love', 'values', 'daily')),
   content     TEXT NOT NULL,
+  en_content  TEXT,
   is_active   BOOLEAN NOT NULL DEFAULT TRUE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

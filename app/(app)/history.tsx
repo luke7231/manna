@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useFocusEffect } from '@react-navigation/native';
 import { HistoryItem } from '../../src/features/history/HistoryItem';
 import { LoadingView } from '../../src/components/LoadingView';
@@ -28,6 +29,7 @@ import { DailyQuestion, Answer, HistoryItem as HistoryItemType } from '../../src
 const FREE_HISTORY_LIMIT = 30; // 무료: 최근 30개
 
 export default function HistoryScreen() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { profile, pair } = useProfileStore();
   const { isGold } = useGoldStatus();
@@ -88,21 +90,21 @@ export default function HistoryScreen() {
     setRefreshing(false);
   };
 
-  if (loading) return <LoadingView message="히스토리를 불러오고 있어요..." />;
+  if (loading) return <LoadingView message={t('common.loading')} />;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>히스토리</Text>
+          <Text style={styles.headerTitle}>{t('history.title')}</Text>
           {isGold && <GoldBadge size="sm" />}
         </View>
         <Text style={styles.headerSub}>
-          {isGold ? '전체 기록을 볼 수 있어요' : `최근 ${FREE_HISTORY_LIMIT}일 기록을 볼 수 있어요`}
+          {isGold ? t('history.subtitleGold') : t('history.freeLimit', { count: FREE_HISTORY_LIMIT })}
         </Text>
         {!isGold && (
           <TouchableOpacity onPress={() => router.push('/(app)/gold')} style={styles.goldNudge}>
-            <Text style={styles.goldNudgeText}>⭐ 골드로 히스토리 무제한 보기 →</Text>
+            <Text style={styles.goldNudgeText}>{t('history.goldNudge')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -125,8 +127,8 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <EmptyState
             emoji="📭"
-            title="아직 질문이 없어요"
-            description="매일 새로운 질문이 추가돼요"
+            title={t('history.empty')}
+            description={t('history.emptyDesc')}
           />
         }
         showsVerticalScrollIndicator={false}

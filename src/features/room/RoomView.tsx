@@ -1,17 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../lib/constants/colors';
 import { Room, ShopItem } from '../../types';
+import i18n from '../../lib/i18n';
 
-// 테마별 배경 스타일
-const THEME_STYLES: Record<string, { bg: string; label: string }> = {
-  '00000000-0000-0000-0010-000000000001': { bg: '#FFF9F0', label: '기본 방 🏠' },
-  '00000000-0000-0000-0010-000000000002': { bg: '#EDF5E9', label: '숲속 오두막 🌲' },
-  '00000000-0000-0000-0010-000000000003': { bg: '#E8F4FB', label: '바다 뷰 🌊' },
-  '00000000-0000-0000-0010-000000000004': { bg: '#F0EDF8', label: '별빛 다락방 ✨' },
+const THEME_BG: Record<string, string> = {
+  '00000000-0000-0000-0010-000000000001': '#FFF9F0',
+  '00000000-0000-0000-0010-000000000002': '#EDF5E9',
+  '00000000-0000-0000-0010-000000000003': '#E8F4FB',
+  '00000000-0000-0000-0010-000000000004': '#F0EDF8',
+  '00000000-0000-0000-0010-000000000005': '#FFFDE7',
+  '00000000-0000-0000-0010-000000000006': '#F3E5F5',
 };
-
-const DEFAULT_THEME = { bg: '#FFF9F0', label: '기본 방 🏠' };
+const DEFAULT_BG = '#FFF9F0';
 
 interface RoomViewProps {
   room: Room | null;
@@ -20,13 +22,21 @@ interface RoomViewProps {
 }
 
 export function RoomView({ room, shopItems, onOpenShop }: RoomViewProps) {
-  const themeStyle = room?.theme_item_id
-    ? THEME_STYLES[room.theme_item_id] ?? DEFAULT_THEME
-    : DEFAULT_THEME;
+  const { t } = useTranslation();
+
+  const themeBg = room?.theme_item_id
+    ? (THEME_BG[room.theme_item_id] ?? DEFAULT_BG)
+    : DEFAULT_BG;
+
+  const themeItem = room?.theme_item_id
+    ? shopItems.find((i) => i.id === room.theme_item_id)
+    : null;
+  const themeName = themeItem
+    ? `${i18n.language === 'ko' ? themeItem.name : (themeItem.en_name ?? themeItem.name)} ${themeItem.emoji ?? ''}`
+    : t('room.themeDefault');
 
   const furnitureMap = Object.fromEntries(shopItems.map((i) => [i.id, i]));
 
-  // 6슬롯 배열 구성
   const slots: (ShopItem | null)[] = Array(6).fill(null);
   (room?.furniture ?? []).forEach(({ item_id, slot }) => {
     const idx = slot - 1;
@@ -35,20 +45,18 @@ export function RoomView({ room, shopItems, onOpenShop }: RoomViewProps) {
 
   return (
     <View style={styles.container}>
-      {/* 방 제목 + 버튼 */}
       <View style={styles.titleRow}>
-        <Text style={styles.title}>우리의 방</Text>
+        <Text style={styles.title}>{t('room.title')}</Text>
         <TouchableOpacity style={styles.themeBtn} onPress={() => onOpenShop('theme')}>
-          <Text style={styles.themeBtnText}>{themeStyle.label}</Text>
+          <Text style={styles.themeBtnText}>{themeName}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 방 내부 */}
-      <View style={[styles.room, { backgroundColor: themeStyle.bg }]}>
+      <View style={[styles.room, { backgroundColor: themeBg }]}>
         <View style={styles.furnitureGrid}>
-          {slots.map((item, i) => (
+          {slots.map((item, idx) => (
             <TouchableOpacity
-              key={i}
+              key={idx}
               style={styles.slot}
               onPress={() => onOpenShop('furniture')}
               activeOpacity={0.7}
@@ -63,9 +71,8 @@ export function RoomView({ room, shopItems, onOpenShop }: RoomViewProps) {
         </View>
       </View>
 
-      {/* 가구 변경 버튼 */}
       <TouchableOpacity style={styles.furnitureBtn} onPress={() => onOpenShop('furniture')}>
-        <Text style={styles.furnitureBtnText}>🛋️ 가구 변경</Text>
+        <Text style={styles.furnitureBtnText}>{t('room.furnitureBtn')}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -185,3 +185,97 @@ INSERT INTO shop_items (id, category, name, description, price, emoji, is_gold_o
 ('00000000-0000-0000-0011-000000000008', 'furniture', '크리스탈 조명', '반짝이는 크리스탈 조명이에요',        0,  '💎', TRUE, 10),
 ('00000000-0000-0000-0011-000000000009', 'furniture', '하트 쿠션',     '사랑스러운 하트 쿠션이에요',          0,  '🩷', TRUE, 11)
 ON CONFLICT (id) DO NOTHING;
+
+-- ───────────────────────────────────────────────────────────
+-- ENGLISH TRANSLATIONS — en_content for questions
+-- ───────────────────────────────────────────────────────────
+
+-- FAITH
+UPDATE questions SET en_content = 'When was a moment today you felt grateful to God?' WHERE id = '00000000-0000-0000-0001-000000000001';
+UPDATE questions SET en_content = 'What is something you most want to be prayed over lately?' WHERE id = '00000000-0000-0000-0001-000000000002';
+UPDATE questions SET en_content = 'What was the most important turning point in your faith journey?' WHERE id = '00000000-0000-0000-0001-000000000003';
+UPDATE questions SET en_content = 'When do you feel God''s presence most clearly in your life?' WHERE id = '00000000-0000-0000-0001-000000000004';
+UPDATE questions SET en_content = 'Which verse have you been reading lately that has stayed with you most?' WHERE id = '00000000-0000-0000-0001-000000000005';
+UPDATE questions SET en_content = 'In what area do you feel you have grown most within your church community?' WHERE id = '00000000-0000-0000-0001-000000000006';
+UPDATE questions SET en_content = 'How do you talk to God when you pray?' WHERE id = '00000000-0000-0000-0001-000000000007';
+UPDATE questions SET en_content = 'How is your faith changing your everyday life?' WHERE id = '00000000-0000-0000-0001-000000000008';
+UPDATE questions SET en_content = 'When have you felt God''s love most deeply?' WHERE id = '00000000-0000-0000-0001-000000000009';
+UPDATE questions SET en_content = 'What verse or anchor of faith do you hold onto in difficult times?' WHERE id = '00000000-0000-0000-0001-000000000010';
+UPDATE questions SET en_content = 'What area of your life do you feel God is working on right now?' WHERE id = '00000000-0000-0000-0001-000000000011';
+UPDATE questions SET en_content = 'When do you feel most moved during worship?' WHERE id = '00000000-0000-0000-0001-000000000012';
+UPDATE questions SET en_content = 'Have you experienced what felt like an answered prayer recently?' WHERE id = '00000000-0000-0000-0001-000000000013';
+UPDATE questions SET en_content = 'Is there someone you look up to as a role model in faith? Why?' WHERE id = '00000000-0000-0000-0001-000000000014';
+UPDATE questions SET en_content = 'Is there something you want to honestly pour out to God right now?' WHERE id = '00000000-0000-0000-0001-000000000015';
+
+-- LOVE
+UPDATE questions SET en_content = 'What does true love look like to you?' WHERE id = '00000000-0000-0000-0002-000000000001';
+UPDATE questions SET en_content = 'When do you feel most loved by your partner?' WHERE id = '00000000-0000-0000-0002-000000000002';
+UPDATE questions SET en_content = 'How would you describe the way you love your partner in one phrase?' WHERE id = '00000000-0000-0000-0002-000000000003';
+UPDATE questions SET en_content = 'When are you happiest while spending time together?' WHERE id = '00000000-0000-0000-0002-000000000004';
+UPDATE questions SET en_content = 'What do you think matters most when the two of you face conflict?' WHERE id = '00000000-0000-0000-0002-000000000005';
+UPDATE questions SET en_content = 'When do you feel your partner truly understands you?' WHERE id = '00000000-0000-0000-0002-000000000006';
+UPDATE questions SET en_content = 'What are you most grateful to your partner for?' WHERE id = '00000000-0000-0000-0002-000000000007';
+UPDATE questions SET en_content = 'Is there a ritual or tradition unique to the two of you that you want to build together?' WHERE id = '00000000-0000-0000-0002-000000000008';
+UPDATE questions SET en_content = 'What is something you would willingly give up for the person you love?' WHERE id = '00000000-0000-0000-0002-000000000009';
+UPDATE questions SET en_content = 'If you imagine the two of you 10 years from now, what does that picture look like?' WHERE id = '00000000-0000-0000-0002-000000000010';
+UPDATE questions SET en_content = 'What about your partner makes you feel safe and at ease?' WHERE id = '00000000-0000-0000-0002-000000000011';
+UPDATE questions SET en_content = 'What do you think is the hardest part of love?' WHERE id = '00000000-0000-0000-0002-000000000012';
+UPDATE questions SET en_content = 'What does it mean to you for two people to grow together?' WHERE id = '00000000-0000-0000-0002-000000000013';
+UPDATE questions SET en_content = 'What do you need most from your partner when you are struggling?' WHERE id = '00000000-0000-0000-0002-000000000014';
+UPDATE questions SET en_content = 'What is the most important value you hold for marriage or your future together?' WHERE id = '00000000-0000-0000-0002-000000000015';
+
+-- VALUES
+UPDATE questions SET en_content = 'What are the three most important values in your life?' WHERE id = '00000000-0000-0000-0003-000000000001';
+UPDATE questions SET en_content = 'Between money and time, which do you value more? Why?' WHERE id = '00000000-0000-0000-0003-000000000002';
+UPDATE questions SET en_content = 'What is something you absolutely want to accomplish in your lifetime?' WHERE id = '00000000-0000-0000-0003-000000000003';
+UPDATE questions SET en_content = 'How do you think about forgiveness?' WHERE id = '00000000-0000-0000-0003-000000000004';
+UPDATE questions SET en_content = 'How do you tend to process and accept failure?' WHERE id = '00000000-0000-0000-0003-000000000005';
+UPDATE questions SET en_content = 'Who is the most important relationship in your life right now?' WHERE id = '00000000-0000-0000-0003-000000000006';
+UPDATE questions SET en_content = 'Do you lean more toward planning for the future or savoring the present?' WHERE id = '00000000-0000-0000-0003-000000000007';
+UPDATE questions SET en_content = 'What does "success" look like to you?' WHERE id = '00000000-0000-0000-0003-000000000008';
+UPDATE questions SET en_content = 'Between financial freedom and meaningful work, which matters more to you?' WHERE id = '00000000-0000-0000-0003-000000000009';
+UPDATE questions SET en_content = 'What are you most afraid of?' WHERE id = '00000000-0000-0000-0003-000000000010';
+UPDATE questions SET en_content = 'What is the biggest experience that has shaped who you are today?' WHERE id = '00000000-0000-0000-0003-000000000011';
+UPDATE questions SET en_content = 'Who do you want to be 10 years from now?' WHERE id = '00000000-0000-0000-0003-000000000012';
+UPDATE questions SET en_content = 'What does rest mean to you?' WHERE id = '00000000-0000-0000-0003-000000000013';
+UPDATE questions SET en_content = 'How do you want to be remembered by others?' WHERE id = '00000000-0000-0000-0003-000000000014';
+UPDATE questions SET en_content = 'What is the area of yourself you most want to grow in right now?' WHERE id = '00000000-0000-0000-0003-000000000015';
+
+-- DAILY
+UPDATE questions SET en_content = 'What thought has been taking up the most space in your mind lately?' WHERE id = '00000000-0000-0000-0004-000000000001';
+UPDATE questions SET en_content = 'What is the most memorable moment of your day?' WHERE id = '00000000-0000-0000-0004-000000000002';
+UPDATE questions SET en_content = 'What are you pouring the most energy into these days?' WHERE id = '00000000-0000-0000-0004-000000000003';
+UPDATE questions SET en_content = 'What is the one thing you want to do most right now?' WHERE id = '00000000-0000-0000-0004-000000000004';
+UPDATE questions SET en_content = 'What made you smile today?' WHERE id = '00000000-0000-0000-0004-000000000005';
+UPDATE questions SET en_content = 'Is there something new you have learned recently?' WHERE id = '00000000-0000-0000-0004-000000000006';
+UPDATE questions SET en_content = 'What are you most excited about these days?' WHERE id = '00000000-0000-0000-0004-000000000007';
+UPDATE questions SET en_content = 'What is the most challenging part of your life right now?' WHERE id = '00000000-0000-0000-0004-000000000008';
+UPDATE questions SET en_content = 'How are you feeling as today comes to an end?' WHERE id = '00000000-0000-0000-0004-000000000009';
+UPDATE questions SET en_content = 'How are you taking care of yourself these days?' WHERE id = '00000000-0000-0000-0004-000000000010';
+
+-- ───────────────────────────────────────────────────────────
+-- ENGLISH TRANSLATIONS — en_name + en_description for shop_items
+-- ───────────────────────────────────────────────────────────
+
+-- Themes
+UPDATE shop_items SET en_name = 'Default Room',   en_description = 'A warm and cozy space just for the two of you.'               WHERE id = '00000000-0000-0000-0010-000000000001';
+UPDATE shop_items SET en_name = 'Forest Cabin',   en_description = 'A snug cabin nestled in lush green nature.'                   WHERE id = '00000000-0000-0000-0010-000000000002';
+UPDATE shop_items SET en_name = 'Ocean View',     en_description = 'A refreshing space with a gorgeous view of the sea.'          WHERE id = '00000000-0000-0000-0010-000000000003';
+UPDATE shop_items SET en_name = 'Starlit Attic',  en_description = 'A romantic attic where the stars pour right in.'              WHERE id = '00000000-0000-0000-0010-000000000004';
+UPDATE shop_items SET en_name = 'Golden Room',    en_description = 'A luxurious room bathed in warm golden light.'                WHERE id = '00000000-0000-0000-0010-000000000005';
+UPDATE shop_items SET en_name = 'Moonlit Garden', en_description = 'A romantic garden filled with soft moonlight.'                WHERE id = '00000000-0000-0000-0010-000000000006';
+
+-- Furniture
+UPDATE shop_items SET en_name = 'Tiny Plant',     en_description = 'A cute little green potted plant.'                           WHERE id = '00000000-0000-0000-0011-000000000001';
+UPDATE shop_items SET en_name = 'Star Lamp',      en_description = 'A softly glowing star-shaped light.'                         WHERE id = '00000000-0000-0000-0011-000000000002';
+UPDATE shop_items SET en_name = 'Rainbow Rug',    en_description = 'A colorful and cheerful rug for your space.'                 WHERE id = '00000000-0000-0000-0011-000000000003';
+UPDATE shop_items SET en_name = 'Small Table',    en_description = 'A perfect little table for two to sit across from each other.' WHERE id = '00000000-0000-0000-0011-000000000004';
+UPDATE shop_items SET en_name = 'Bookshelf',      en_description = 'A bookshelf filled with your precious memories.'             WHERE id = '00000000-0000-0000-0011-000000000005';
+UPDATE shop_items SET en_name = 'Cozy Sofa',      en_description = 'A cozy sofa you will always want to share.'                  WHERE id = '00000000-0000-0000-0011-000000000006';
+UPDATE shop_items SET en_name = 'Flower Vase',    en_description = 'A beautiful vase with lovely blooms inside.'                 WHERE id = '00000000-0000-0000-0011-000000000007';
+UPDATE shop_items SET en_name = 'Crystal Light',  en_description = 'A sparkling crystal light fixture.'                          WHERE id = '00000000-0000-0000-0011-000000000008';
+UPDATE shop_items SET en_name = 'Heart Cushion',  en_description = 'An adorable heart-shaped cushion.'                           WHERE id = '00000000-0000-0000-0011-000000000009';
+
+-- Pet name
+UPDATE shop_items SET en_name = 'Rename Ticket',  en_description = 'Change your Spirit''s name to anything you like.'            WHERE id = '00000000-0000-0000-0012-000000000001';
+

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../components/Card';
 import { colors } from '../../lib/constants/colors';
 import { HistoryItem as HistoryItemType } from '../../types';
@@ -19,6 +20,7 @@ interface HistoryItemProps {
 }
 
 export function HistoryItem({ item, isConnected, partnerName }: HistoryItemProps) {
+  const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const { dailyQuestion, myAnswer, partnerAnswer } = item;
   const { question } = dailyQuestion;
@@ -26,6 +28,9 @@ export function HistoryItem({ item, isConnected, partnerName }: HistoryItemProps
   const categoryColor = CATEGORY_COLORS[question.category];
   const dateLabel = formatDateShort(dailyQuestion.question_date);
   const dayLabel = formatDayOfWeek(dailyQuestion.question_date);
+  const content = i18n.language === 'ko'
+    ? question.content
+    : (question.en_content ?? question.content);
 
   return (
     <Card style={styles.card} padding={18}>
@@ -42,7 +47,7 @@ export function HistoryItem({ item, isConnected, partnerName }: HistoryItemProps
         </View>
 
         <Text style={styles.question} numberOfLines={expanded ? undefined : 2}>
-          {question.content}
+          {content}
         </Text>
 
         {myAnswer ? (
@@ -52,20 +57,20 @@ export function HistoryItem({ item, isConnected, partnerName }: HistoryItemProps
             </Text>
           </View>
         ) : (
-          <Text style={styles.noAnswerText}>답변을 작성하지 않았어요</Text>
+          <Text style={styles.noAnswerText}>{t('history.noAnswer')}</Text>
         )}
       </TouchableOpacity>
 
       {expanded && isConnected && (
         <View style={styles.partnerSection}>
           <View style={styles.divider} />
-          <Text style={styles.partnerLabel}>{partnerName ?? '상대방'}</Text>
+          <Text style={styles.partnerLabel}>{partnerName ?? t('home.partnerAnswerDefault')}</Text>
           {!myAnswer ? (
-            <Text style={styles.noAnswerText}>내 답변을 작성해야 볼 수 있어요 🔒</Text>
+            <Text style={styles.noAnswerText}>{t('history.writeFirst')}</Text>
           ) : partnerAnswer ? (
             <Text style={styles.partnerAnswerText}>{partnerAnswer.answer_text}</Text>
           ) : (
-            <Text style={styles.noAnswerText}>아직 답변하지 않았어요</Text>
+            <Text style={styles.noAnswerText}>{t('history.noAnswer')}</Text>
           )}
         </View>
       )}

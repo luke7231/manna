@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { LoadingView } from '../src/components/LoadingView';
@@ -27,6 +28,7 @@ import { useProfileStore } from '../src/stores/profileStore';
 import { useGoldStatus } from '../src/hooks/useGoldStatus';
 
 export default function AnswerScreen() {
+  const { t } = useTranslation();
   const { questionId, questionContent } = useLocalSearchParams<{
     questionId: string;
     questionContent: string;
@@ -61,7 +63,7 @@ export default function AnswerScreen() {
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('권한 필요', '사진 접근 권한이 필요해요.');
+      Alert.alert(t('answer.permissionNeeded'), t('answer.permissionMsg'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -78,7 +80,7 @@ export default function AnswerScreen() {
   const handleSave = async () => {
     const trimmed = answerText.trim();
     if (trimmed.length === 0) {
-      Alert.alert('답변을 입력해주세요');
+      Alert.alert(t('common.error'));
       return;
     }
     setSaving(true);
@@ -95,7 +97,7 @@ export default function AnswerScreen() {
     setSaving(false);
 
     if (error) {
-      Alert.alert('오류', '저장 중 문제가 생겼어요. 다시 시도해주세요.');
+      Alert.alert(t('common.error'));
       return;
     }
 
@@ -135,34 +137,34 @@ export default function AnswerScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Text style={styles.cancelText}>취소</Text>
+            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{isEditing ? '답변 수정' : '오늘의 답변'}</Text>
+          <Text style={styles.headerTitle}>{isEditing ? t('answer.editTitle') : t('answer.title')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
         {/* Question */}
         <Card style={styles.questionCard} padding={20}>
-          <Text style={styles.questionLabel}>오늘의 질문</Text>
+          <Text style={styles.questionLabel}>{t('answer.questionLabel')}</Text>
           <Text style={styles.questionText}>{questionContent}</Text>
         </Card>
 
         {/* Answer input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>
-            {isEditing ? '답변 수정하기' : '내 답변 쓰기'}
+            {isEditing ? t('answer.editAnswerLabel') : t('answer.myAnswerLabel')}
           </Text>
           <TextInput
             style={styles.textInput}
             value={answerText}
             onChangeText={setAnswerText}
-            placeholder="솔직하고 진심 어린 답변을 써보세요 ✍️"
+            placeholder={t('answer.placeholder')}
             placeholderTextColor={colors.textLight}
             multiline
             textAlignVertical="top"
             autoFocus
           />
-          <Text style={styles.charCount}>{answerText.length}자</Text>
+          <Text style={styles.charCount}>{t('answer.charCount', { count: answerText.length })}</Text>
         </View>
 
         {/* 사진 첨부 (골드 전용) */}
@@ -170,7 +172,7 @@ export default function AnswerScreen() {
           <View style={styles.imageSection}>
             <TouchableOpacity style={styles.imagePickerBtn} onPress={handlePickImage} activeOpacity={0.7}>
               <Text style={styles.imagePickerText}>
-                {imageUri ? '📸 사진 변경' : '📸 사진 첨부 (골드)'}
+                {imageUri ? t('answer.photoChange') : t('answer.photoAttach')}
               </Text>
             </TouchableOpacity>
             {imageUri && (
@@ -185,7 +187,7 @@ export default function AnswerScreen() {
         )}
 
         <Button
-          title={isEditing ? '수정 완료' : '저장하기'}
+          title={isEditing ? t('answer.saveEdit') : t('answer.save')}
           onPress={handleSave}
           loading={saving}
           disabled={answerText.trim().length === 0}

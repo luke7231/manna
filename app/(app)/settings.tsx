@@ -8,12 +8,14 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../src/components/Card';
 import { GoldBadge } from '../../src/components/GoldBadge';
 import { colors } from '../../src/lib/constants/colors';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useProfileStore } from '../../src/stores/profileStore';
 import { useGoldStatus } from '../../src/hooks/useGoldStatus';
+import { changeLanguage, getCurrentLanguage, SupportedLanguage } from '../../src/lib/i18n';
 
 
 function SettingRow({
@@ -44,6 +46,8 @@ function SettingRow({
 }
 
 export default function SettingsScreen() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language as SupportedLanguage;
   const { signOut } = useAuthStore();
   const { profile } = useProfileStore();
   const { isGold, expiresAt } = useGoldStatus();
@@ -51,10 +55,10 @@ export default function SettingsScreen() {
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = () => {
-    Alert.alert('로그아웃', '정말 로그아웃 하시겠어요?', [
-      { text: '취소', style: 'cancel' },
+    Alert.alert(t('settings.signOutConfirmTitle'), t('settings.signOutConfirmMsg'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: '로그아웃',
+        text: t('settings.signOutConfirmBtn'),
         style: 'destructive',
         onPress: async () => {
           setSigningOut(true);
@@ -71,12 +75,12 @@ export default function SettingsScreen() {
       contentContainerStyle={styles.content}
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>설정</Text>
+        <Text style={styles.headerTitle}>{t('settings.title')}</Text>
       </View>
 
-      {/* 만나골드 섹션 */}
+      {/* Subscription section */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>구독</Text>
+        <Text style={styles.sectionLabel}>{t('settings.sectionSubscription')}</Text>
         {isGold ? (
           <TouchableOpacity
             style={styles.goldActiveCard}
@@ -87,12 +91,12 @@ export default function SettingsScreen() {
               <Text style={styles.goldActiveEmoji}>⭐</Text>
               <View style={styles.goldActiveInfo}>
                 <View style={styles.goldActiveTitleRow}>
-                  <Text style={styles.goldActiveTitle}>만나골드 이용 중</Text>
+                  <Text style={styles.goldActiveTitle}>{t('settings.goldActiveTitle')}</Text>
                   <GoldBadge size="sm" />
                 </View>
                 {expiresAt && (
                   <Text style={styles.goldActiveExpiry}>
-                    갱신일: {new Date(expiresAt).toLocaleDateString('ko-KR')}
+                    {t('settings.goldActiveExpiry', { date: new Date(expiresAt).toLocaleDateString() })}
                   </Text>
                 )}
               </View>
@@ -107,8 +111,8 @@ export default function SettingsScreen() {
           >
             <Text style={styles.goldPromoEmoji}>⭐</Text>
             <View style={styles.goldPromoInfo}>
-              <Text style={styles.goldPromoTitle}>만나골드 시작하기</Text>
-              <Text style={styles.goldPromoDesc}>광고 제거 · 사진 첨부 · 히스토리 무제한</Text>
+              <Text style={styles.goldPromoTitle}>{t('settings.goldPromoTitle')}</Text>
+              <Text style={styles.goldPromoDesc}>{t('settings.goldPromoDesc')}</Text>
             </View>
             <Text style={styles.settingArrow}>›</Text>
           </TouchableOpacity>
@@ -117,13 +121,13 @@ export default function SettingsScreen() {
 
       {/* Profile section */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>프로필</Text>
+        <Text style={styles.sectionLabel}>{t('settings.sectionProfile')}</Text>
         <Card padding={0} style={styles.sectionCard}>
-          <SettingRow label="내 이름" value={profile?.name ?? '-'} />
+          <SettingRow label={t('settings.myName')} value={profile?.name ?? '-'} />
           {profile?.partner_name && (
             <>
               <View style={styles.rowDivider} />
-              <SettingRow label="상대방 이름" value={profile.partner_name} />
+              <SettingRow label={t('settings.partnerName')} value={profile.partner_name} />
             </>
           )}
         </Card>
@@ -131,20 +135,44 @@ export default function SettingsScreen() {
 
       {/* App info section */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>앱 정보</Text>
+        <Text style={styles.sectionLabel}>{t('settings.sectionApp')}</Text>
         <Card padding={0} style={styles.sectionCard}>
-          <SettingRow label="버전" value="1.0.0" />
+          <SettingRow label={t('settings.version')} value="1.0.0" />
           <View style={styles.rowDivider} />
-          <SettingRow label="만든 곳" value="Manna Team" />
+          <SettingRow label={t('settings.madeBy')} value={t('settings.madeByValue')} />
+        </Card>
+      </View>
+
+      {/* Language section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>{t('settings.sectionLanguage')}</Text>
+        <Card padding={0} style={styles.sectionCard}>
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => changeLanguage('en')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.settingLabel}>{t('settings.languageEn')}</Text>
+            {currentLang === 'en' && <Text style={styles.checkmark}>✓</Text>}
+          </TouchableOpacity>
+          <View style={styles.rowDivider} />
+          <TouchableOpacity
+            style={styles.settingRow}
+            onPress={() => changeLanguage('ko')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.settingLabel}>{t('settings.languageKo')}</Text>
+            {currentLang === 'ko' && <Text style={styles.checkmark}>✓</Text>}
+          </TouchableOpacity>
         </Card>
       </View>
 
       {/* Account section */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>계정</Text>
+        <Text style={styles.sectionLabel}>{t('settings.sectionAccount')}</Text>
         <Card padding={0} style={styles.sectionCard}>
           <SettingRow
-            label={signingOut ? '로그아웃 중...' : '로그아웃'}
+            label={signingOut ? t('settings.signingOut') : t('settings.signOut')}
             onPress={signingOut ? undefined : handleSignOut}
             destructive
           />
@@ -218,6 +246,11 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.borderLight,
     marginLeft: 16,
+  },
+  checkmark: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '700',
   },
   footer: {
     fontSize: 12,

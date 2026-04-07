@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { colors } from '../../src/lib/constants/colors';
@@ -19,6 +20,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const router = useRouter();
+  const { t } = useTranslation();
 
   const validateEmail = (value: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -27,7 +29,7 @@ export default function LoginScreen() {
   const handleSendOtp = async () => {
     const trimmed = email.trim();
     if (!validateEmail(trimmed)) {
-      setEmailError('올바른 이메일 주소를 입력해주세요.');
+      setEmailError(t('auth.invalidEmail'));
       return;
     }
     setEmailError('');
@@ -36,7 +38,7 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (error) {
-      Alert.alert('오류', '이메일 전송에 실패했어요. 잠시 후 다시 시도해주세요.');
+      Alert.alert(t('auth.sendError'));
       return;
     }
 
@@ -55,21 +57,21 @@ export default function LoginScreen() {
         <View style={styles.header}>
           <Text style={styles.logo}>✦ Manna</Text>
           <Text style={styles.tagline}>
-            매일 하나의 질문으로{'\n'}더 깊은 대화를 시작해요
+            {t('auth.loginSubtitle')}
           </Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.title}>시작하기</Text>
+          <Text style={styles.title}>{t('auth.loginTitle')}</Text>
           <Text style={styles.subtitle}>
-            이메일로 인증 코드를 보내드릴게요
+            {t('auth.loginSubtitle')}
           </Text>
 
           <Input
-            label="이메일"
+            label={t('auth.emailLabel')}
             value={email}
-            onChangeText={(t) => {
-              setEmail(t);
+            onChangeText={(text) => {
+              setEmail(text);
               if (emailError) setEmailError('');
             }}
             placeholder="hello@example.com"
@@ -81,7 +83,7 @@ export default function LoginScreen() {
           />
 
           <Button
-            title="인증 코드 받기"
+            title={t('auth.sendOtp')}
             onPress={handleSendOtp}
             loading={loading}
             disabled={email.trim().length === 0}

@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '../src/stores/authStore';
@@ -9,6 +9,7 @@ import { registerForPushNotifications, scheduleDailyQuestionNotification } from 
 import { savePushToken } from '../src/lib/supabase/profile';
 import MobileAds from 'react-native-google-mobile-ads';
 import { configurePurchases, loginPurchases, logoutPurchases } from '../src/lib/purchases';
+import { initI18n } from '../src/lib/i18n';
 
 function AuthGuard() {
   const { session, initialized: authInitialized, initialize } = useAuthStore();
@@ -86,14 +87,16 @@ function AuthGuard() {
 
 export default function RootLayout() {
   const { initialized } = useAuthStore();
+  const [i18nReady, setI18nReady] = useState(false);
 
   useEffect(() => {
+    initI18n().then(() => setI18nReady(true));
     MobileAds().initialize();
     configurePurchases();
   }, []);
 
-  if (!initialized) {
-    return <LoadingView message="잠깐만요..." />;
+  if (!initialized || !i18nReady) {
+    return <LoadingView />;
   }
 
   return (

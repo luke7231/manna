@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { BottomTabBar } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../src/lib/constants/colors';
 import { BannerAdView } from '../../src/components/BannerAdView';
 
@@ -11,6 +12,7 @@ function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
 }
 
 export default function AppLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       tabBar={(props) => (
@@ -40,35 +42,35 @@ export default function AppLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: '오늘',
+          title: t('tabs.today'),
           tabBarIcon: ({ focused }) => <TabIcon emoji="✦" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: '히스토리',
+          title: t('tabs.history'),
           tabBarIcon: ({ focused }) => <TabIcon emoji="📖" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="us"
         options={{
-          title: '우리',
+          title: t('tabs.together'),
           tabBarIcon: ({ focused }) => <TabIcon emoji="🐣" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="pairing"
         options={{
-          title: '연결',
+          title: t('tabs.connect'),
           tabBarIcon: ({ focused }) => <TabIcon emoji="💌" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: '설정',
+          title: t('tabs.settings'),
           tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" focused={focused} />,
         }}
       />

@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { PurchasesOffering, PurchasesPackage } from 'react-native-purchases';
 import { colors } from '../../src/lib/constants/colors';
 import { GoldBadge } from '../../src/components/GoldBadge';
@@ -21,16 +22,17 @@ import {
   PRODUCT_IDS,
 } from '../../src/lib/purchases';
 
-const BENEFITS = [
-  { emoji: '🚫', text: '광고 없는 깔끔한 앱' },
-  { emoji: '📸', text: '답변에 사진 첨부' },
-  { emoji: '📚', text: '히스토리 무제한 조회' },
-  { emoji: '✨', text: '프리미엄 방꾸미기 아이템' },
-  { emoji: '🪨', text: '가입 즉시 만나돌 500개 지급' },
-];
-
 export default function GoldScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
+
+  const BENEFITS = [
+    { emoji: '🚫', text: t('gold.benefit1') },
+    { emoji: '📸', text: t('gold.benefit2') },
+    { emoji: '📚', text: t('gold.benefit3') },
+    { emoji: '✨', text: t('gold.benefit4') },
+    { emoji: '🪨', text: t('gold.benefit5') },
+  ];
   const { isGold, expiresAt } = useGoldStatus();
 
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
@@ -64,11 +66,11 @@ export default function GoldScreen() {
 
     if (result.cancelled) return;
     if (result.success) {
-      Alert.alert('🎉 만나골드 시작!', '만나돌 500개가 지급되었어요.\n프리미엄 혜택을 즐겨보세요!', [
-        { text: '확인', onPress: () => router.back() },
+      Alert.alert(t('gold.successTitle'), t('gold.successMsg'), [
+        { text: t('common.confirm'), onPress: () => router.back() },
       ]);
     } else {
-      Alert.alert('구매 실패', '다시 시도해주세요.');
+      Alert.alert(t('gold.purchaseFailed'));
     }
   };
 
@@ -77,22 +79,21 @@ export default function GoldScreen() {
     const restored = await restorePurchases();
     setRestoring(false);
     if (restored) {
-      Alert.alert('복원 완료', '골드 구독이 복원되었어요!', [
-        { text: '확인', onPress: () => router.back() },
+      Alert.alert(t('gold.restoreSuccess'), undefined, [
+        { text: t('common.confirm'), onPress: () => router.back() },
       ]);
     } else {
-      Alert.alert('구독 없음', '복원할 구독 내역이 없어요.');
+      Alert.alert(t('gold.restoreNone'));
     }
   };
 
   const formatPrice = (pkg: PurchasesPackage) =>
     pkg.product.priceString;
 
-  const getMonthlyEquiv = (pkg: PurchasesPackage) => {
-    // 연간 플랜이면 월 환산 표시
+  const getMonthlyEquiv = (pkg: PurchasesPackage): string | null => {
     if (pkg.product.identifier === PRODUCT_IDS.annual) {
       const monthly = pkg.product.price / 12;
-      return `월 ${Math.round(monthly).toLocaleString()}원`;
+      return Math.round(monthly).toLocaleString();
     }
     return null;
   };
@@ -105,17 +106,17 @@ export default function GoldScreen() {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← 뒤로</Text>
+          <Text style={styles.backText}>{`← ${t('common.back')}`}</Text>
         </TouchableOpacity>
         <View style={styles.goldActiveCard}>
           <Text style={styles.goldActiveEmoji}>⭐</Text>
-          <Text style={styles.goldActiveTitle}>만나골드 이용 중</Text>
+          <Text style={styles.goldActiveTitle}>{t('gold.activeTitle')}</Text>
           {expDate && (
-            <Text style={styles.goldActiveExpiry}>다음 갱신일: {expDate}</Text>
+            <Text style={styles.goldActiveExpiry}>{t('gold.activeExpiry', { date: expDate })}</Text>
           )}
         </View>
         <Card padding={20}>
-          <Text style={styles.benefitsTitle}>현재 혜택</Text>
+          <Text style={styles.benefitsTitle}>{t('gold.benefitsTitle')}</Text>
           <View style={styles.benefitsList}>
             {BENEFITS.map((b) => (
               <View key={b.text} style={styles.benefitRow}>
@@ -126,7 +127,7 @@ export default function GoldScreen() {
           </View>
         </Card>
         <TouchableOpacity style={styles.manageBtn}>
-          <Text style={styles.manageBtnText}>구독 관리 (App Store / Play Store)</Text>
+          <Text style={styles.manageBtnText}>{t('gold.manageBtn')}</Text>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -136,19 +137,19 @@ export default function GoldScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* 뒤로 */}
       <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-        <Text style={styles.backText}>← 뒤로</Text>
+        <Text style={styles.backText}>{`← ${t('common.back')}`}</Text>
       </TouchableOpacity>
 
       {/* 헤더 */}
       <View style={styles.heroSection}>
         <Text style={styles.heroEmoji}>⭐</Text>
-        <Text style={styles.heroTitle}>만나골드</Text>
-        <Text style={styles.heroSub}>더 깊은 연결을 위한 프리미엄</Text>
+        <Text style={styles.heroTitle}>{t('gold.title')}</Text>
+        <Text style={styles.heroSub}>{t('gold.subtitle')}</Text>
       </View>
 
       {/* 혜택 목록 */}
       <Card padding={20}>
-        <Text style={styles.benefitsTitle}>골드 혜택</Text>
+        <Text style={styles.benefitsTitle}>{t('gold.benefitsTitle')}</Text>
         <View style={styles.benefitsList}>
           {BENEFITS.map((b) => (
             <View key={b.text} style={styles.benefitRow}>
@@ -164,7 +165,7 @@ export default function GoldScreen() {
         <ActivityIndicator color={colors.primary} style={{ marginVertical: 24 }} />
       ) : offering ? (
         <View style={styles.plansSection}>
-          <Text style={styles.plansTitle}>플랜 선택</Text>
+          <Text style={styles.plansTitle}>{t('gold.plansTitle')}</Text>
           {offering.availablePackages.map((pkg) => {
             const isSelected = selectedPkg?.identifier === pkg.identifier;
             const monthlyEquiv = getMonthlyEquiv(pkg);
@@ -183,16 +184,16 @@ export default function GoldScreen() {
                   <View style={styles.planInfo}>
                     <View style={styles.planNameRow}>
                       <Text style={styles.planName}>
-                        {isAnnual ? '연간 플랜' : '월간 플랜'}
+                        {isAnnual ? t('gold.annualPlan') : t('gold.monthlyPlan')}
                       </Text>
                       {isAnnual && (
                         <View style={styles.savingBadge}>
-                          <Text style={styles.savingText}>33% 할인</Text>
+                          <Text style={styles.savingText}>{t('gold.saving')}</Text>
                         </View>
                       )}
                     </View>
                     {monthlyEquiv && (
-                      <Text style={styles.planMonthly}>{monthlyEquiv} 환산</Text>
+                      <Text style={styles.planMonthly}>{t('gold.monthlyEquiv', { price: monthlyEquiv })}</Text>
                     )}
                   </View>
                 </View>
@@ -206,7 +207,7 @@ export default function GoldScreen() {
       ) : (
         <Card padding={20}>
           <Text style={{ color: colors.textMuted, textAlign: 'center' }}>
-            상품 정보를 불러오지 못했어요.{'\n'}인터넷 연결을 확인해주세요.
+            {t('gold.noPlans')}
           </Text>
         </Card>
       )}
@@ -222,7 +223,7 @@ export default function GoldScreen() {
           <ActivityIndicator color="#fff" />
         ) : (
           <Text style={styles.purchaseBtnText}>
-            {selectedPkg ? `${formatPrice(selectedPkg)} 시작하기` : '플랜을 선택해주세요'}
+            {selectedPkg ? t('gold.startBtn', { price: formatPrice(selectedPkg) }) : t('gold.selectPlan')}
           </Text>
         )}
       </TouchableOpacity>
@@ -232,14 +233,13 @@ export default function GoldScreen() {
         {restoring ? (
           <ActivityIndicator color={colors.textMuted} size="small" />
         ) : (
-          <Text style={styles.restoreText}>이미 구독 중이라면 구독 복원</Text>
+          <Text style={styles.restoreText}>{t('gold.restoreBtn')}</Text>
         )}
       </TouchableOpacity>
 
       {/* 주의 문구 */}
       <Text style={styles.disclaimer}>
-        구독은 현재 결제 기간 종료 24시간 이전에 취소하지 않으면 자동으로 갱신됩니다.
-        구독 관리 및 취소는 App Store / Google Play에서 할 수 있어요.
+        {t('gold.disclaimer')}
       </Text>
     </ScrollView>
   );

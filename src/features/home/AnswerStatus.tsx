@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../../components/Card';
 import { colors } from '../../lib/constants/colors';
 import { Answer } from '../../types';
@@ -21,6 +22,8 @@ export function AnswerStatus({
   myAnswerExists = false,
   onPress,
 }: AnswerStatusProps) {
+  const { t } = useTranslation();
+
   const renderContent = () => {
     if (isMe) {
       if (answer) {
@@ -29,7 +32,7 @@ export function AnswerStatus({
             <Text style={styles.answerText} numberOfLines={3}>
               {answer.answer_text}
             </Text>
-            <Text style={styles.editHint}>탭하여 수정하기</Text>
+            <Text style={styles.editHint}>{t('common.edit')}</Text>
           </TouchableOpacity>
         );
       }
@@ -39,7 +42,7 @@ export function AnswerStatus({
           onPress={onPress}
           activeOpacity={0.8}
         >
-          <Text style={styles.writeButtonText}>✏️ 오늘의 답변 작성하기</Text>
+          <Text style={styles.writeButtonText}>✏️ {t('answer.myAnswerLabel')}</Text>
         </TouchableOpacity>
       );
     }
@@ -48,19 +51,19 @@ export function AnswerStatus({
     if (!isConnected) {
       return (
         <Text style={styles.notConnected}>
-          상대방과 연결되면{'\n'}답변을 확인할 수 있어요 💌
+          {t('pairing.notConnectedDesc')}
         </Text>
       );
     }
     if (!myAnswerExists) {
       return (
         <Text style={styles.notConnected}>
-          내 답변을 먼저 작성해야{'\n'}상대방 답변을 볼 수 있어요 🔒
+          {t('history.writeFirst')}
         </Text>
       );
     }
     if (!answer) {
-      return <Text style={styles.noAnswer}>아직 답변하지 않았어요</Text>;
+      return <Text style={styles.noAnswer}>{t('history.noAnswer')}</Text>;
     }
     return <Text style={styles.answerText}>{answer.answer_text}</Text>;
   };
