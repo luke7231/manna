@@ -92,7 +92,7 @@ export default function UsScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>{t('tabs.together')}</Text>
-            <Text style={styles.headerSub}>함께 키워가는 공간이에요</Text>
+            <Text style={styles.headerSub}>{t('us.headerSub')}</Text>
           </View>
           {isConnected && (
             <TouchableOpacity style={styles.shopBtn} onPress={() => openShop('theme')}>
@@ -106,9 +106,7 @@ export default function UsScreen() {
           <Card style={styles.emptyCard} padding={24}>
             <Text style={styles.emptyEmoji}>🥚</Text>
             <Text style={styles.emptyTitle}>{t('spirit.connectFirst')}</Text>
-            <Text style={styles.emptyDesc}>
-              연결 탭에서 상대방과 연결하면{'\n'}반려몽이 알에서 깨어나요!
-            </Text>
+            <Text style={styles.emptyDesc}>{t('us.connectDesc')}</Text>
           </Card>
         ) : (
           <>

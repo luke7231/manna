@@ -37,6 +37,7 @@ const ko = {
     emailPlaceholder: '이메일을 입력해주세요',
     sendOtp: '인증 코드 전송',
     sendingOtp: '전송 중...',
+    loginNotice: '처음 오셨나요? 이메일만 입력하면 바로 가입돼요 🙌',
     verifyTitle: '이메일을 확인해주세요',
     verifySubtitle: '{{email}}으로 6자리 인증 코드를 보냈어요',
     otpLabel: '인증 코드',
@@ -44,6 +45,7 @@ const ko = {
     verifyBtn: '인증하기',
     verifying: '인증 중...',
     resend: '코드 재전송',
+    resendQuestion: '코드를 받지 못하셨나요? ',
     invalidEmail: '올바른 이메일 주소를 입력해주세요.',
     otpSent: '인증 코드가 전송됐어요!',
     otpError: '코드가 올바르지 않거나 만료됐어요. 다시 시도해주세요.',
@@ -156,6 +158,10 @@ const ko = {
     slotFull: '가구 슬롯이 가득 찼어요. 기존 가구를 먼저 제거해주세요.',
     balance: '🪨 {{amount}}',
   },
+  us: {
+    headerSub: '함께 키워가는 공간이에요',
+    connectDesc: '연결 탭에서 상대방과 연결하면\n반려몽이 알에서 깨어나요!',
+  },
   gold: {
     title: '만나골드',
     subtitle: '더 깊은 연결을 위한 프리미엄',
@@ -214,6 +220,8 @@ const ko = {
     codeNotFound: '코드를 찾을 수 없거나 이미 사용됐어요.',
     connectError: '연결에 실패했어요. 다시 시도해주세요.',
     alreadyConnected: '이미 사용된 코드예요.',
+    howToTitle: '💡 연결은 어떻게 하나요?',
+    howToDesc: '1. 내 초대 코드를 생성해서 상대방에게 공유하세요\n2. 상대방이 코드를 입력하면 자동으로 연결돼요\n3. 연결 후엔 서로의 답변을 확인할 수 있어요',
   },
   settings: {
     title: '설정',
@@ -239,6 +247,10 @@ const ko = {
     goldActiveExpiry: '갱신일: {{date}}',
     goldPromoTitle: '만나골드 시작하기',
     goldPromoDesc: '광고 제거 · 사진 첨부 · 히스토리 무제한',
+    footer: 'Manna — 신앙 안에서 더 깊은 대화를 ✦',
+  },
+  goldBadge: {
+    label: '⭐ 골드',
   },
   notifications: {
     dailyTitle: '오늘의 질문이 도착했어요 💌',

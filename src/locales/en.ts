@@ -37,6 +37,7 @@ const en = {
     emailPlaceholder: 'Enter your email',
     sendOtp: 'Send verification code',
     sendingOtp: 'Sending...',
+    loginNotice: 'New here? Just enter your email to get started 🙌',
     verifyTitle: 'Check your email',
     verifySubtitle: "We sent a 6-digit code to {{email}}",
     otpLabel: 'Verification code',
@@ -44,6 +45,7 @@ const en = {
     verifyBtn: 'Verify',
     verifying: 'Verifying...',
     resend: 'Resend code',
+    resendQuestion: "Didn't receive a code? ",
     invalidEmail: 'Please enter a valid email address.',
     otpSent: 'Verification code sent!',
     otpError: 'Invalid or expired code. Please try again.',
@@ -156,6 +158,10 @@ const en = {
     slotFull: 'All 6 furniture slots are full. Remove one first.',
     balance: '🪨 {{amount}}',
   },
+  us: {
+    headerSub: 'A space you build together',
+    connectDesc: 'Connect in the Connect tab to hatch your Spirit!',
+  },
   gold: {
     title: 'Manna Gold',
     subtitle: 'Premium for deeper connection',
@@ -214,6 +220,8 @@ const en = {
     codeNotFound: 'Code not found or already used.',
     connectError: 'Failed to connect. Please try again.',
     alreadyConnected: 'This code has already been used.',
+    howToTitle: '💡 How does connecting work?',
+    howToDesc: '1. Generate your invite code and share it\n2. Your partner enters the code to connect\n3. Once connected, you can see each other\'s answers',
   },
   settings: {
     title: 'Settings',
@@ -239,6 +247,10 @@ const en = {
     goldActiveExpiry: 'Renews: {{date}}',
     goldPromoTitle: 'Start Manna Gold',
     goldPromoDesc: 'No ads · Photo attachments · Unlimited history',
+    footer: 'Manna — Deeper conversations through faith ✦',
+  },
+  goldBadge: {
+    label: '⭐ Gold',
   },
   notifications: {
     dailyTitle: "Today's question has arrived 💌",

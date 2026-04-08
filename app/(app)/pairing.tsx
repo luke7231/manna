@@ -145,10 +145,8 @@ export default function PairingScreen() {
 
       {/* Info card */}
       <Card style={styles.infoCard} padding={16}>
-        <Text style={styles.infoTitle}>💡 연결은 어떻게 하나요?</Text>
-        <Text style={styles.infoText}>
-          {'1. 내 초대 코드를 생성해서 상대방에게 공유하세요\n2. 상대방이 코드를 입력하면 자동으로 연결돼요\n3. 연결 후엔 서로의 답변을 확인할 수 있어요'}
-        </Text>
+        <Text style={styles.infoTitle}>{t('pairing.howToTitle')}</Text>
+        <Text style={styles.infoText}>{t('pairing.howToDesc')}</Text>
       </Card>
     </ScrollView>
   );
