@@ -179,9 +179,7 @@ export default function SettingsScreen() {
         </Card>
       </View>
 
-      <Text style={styles.footer}>
-        Manna — 신앙 안에서 더 깊은 대화를 ✦
-      </Text>
+      <Text style={styles.footer}>{t('settings.footer')}</Text>
     </ScrollView>
   );
 }

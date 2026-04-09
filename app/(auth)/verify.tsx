@@ -101,7 +101,7 @@ export default function VerifyScreen() {
           />
 
           <View style={styles.resendRow}>
-            <Text style={styles.resendText}>코드를 받지 못하셨나요? </Text>
+            <Text style={styles.resendText}>{t('auth.resendQuestion')}</Text>
             <TouchableOpacity onPress={handleResend} disabled={resending}>
               <Text style={styles.resendLink}>
                 {resending ? t('auth.sendingOtp') : t('auth.resend')}

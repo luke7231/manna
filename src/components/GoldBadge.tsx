@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../lib/constants/colors';
 
 interface GoldBadgeProps {
@@ -7,9 +8,10 @@ interface GoldBadgeProps {
 }
 
 export function GoldBadge({ size = 'md' }: GoldBadgeProps) {
+  const { t } = useTranslation();
   return (
     <View style={[styles.badge, size === 'sm' && styles.badgeSm]}>
-      <Text style={[styles.text, size === 'sm' && styles.textSm]}>⭐ 골드</Text>
+      <Text style={[styles.text, size === 'sm' && styles.textSm]}>{t('goldBadge.label')}</Text>
     </View>
   );
 }

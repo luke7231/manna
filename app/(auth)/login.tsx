@@ -90,9 +90,7 @@ export default function LoginScreen() {
             size="lg"
           />
 
-          <Text style={styles.notice}>
-            처음 오셨나요? 이메일만 입력하면 바로 가입돼요 🙌
-          </Text>
+          <Text style={styles.notice}>{t('auth.loginNotice')}</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
